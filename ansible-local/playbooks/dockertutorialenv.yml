@@ -1,0 +1,190 @@
+- hosts: localhost
+  user: ubuntu
+  sudo: yes
+  vars:
+    private_registry_mountpoint: /dockerimages
+    docker_priv_registry_path: /registry
+    shipyard_url: "http://{{ansible_eth0['ipv4']['address']}}:8080"
+    shipyard_api_key: "IvIveFbGtVqrWCjQls8cy3pyLaZ73MWVEWSe"
+    docker_priv_reg_uri: "{{ansible_eth0['ipv4']['address']}}:5000"
+    enginename: privateregistry
+  tasks:
+    - name: Install python-pip package
+      apt: name=python-pip state=present
+
+    - name: Install unzip package
+      apt: name=unzip state=present
+
+    - name: Install httplib2 pip module
+      pip: name=httplib2
+
+    - name: Install rethinkdb python driver
+      pip: name=rethinkdb
+
+    - name: Import key for new docker apt repo
+      apt_key:  keyserver="hkp://keyserver.ubuntu.com:80" id=36A1D7869245C8950F966E92D8576A8BA88D21E9
+
+    - name: Install docker apt repo
+      apt_repository: repo='deb https://get.docker.io/ubuntu docker main' state=present update_cache=yes
+
+    - name: Install docker onto 14.04
+      apt:
+        pkg: lxc-docker
+        force: yes
+        state: present
+        cache_valid_time: 600
+      register: docker_package
+      when: "ansible_distribution_version == '14.04'"
+
+    - name: Allow docker to run also on tcp
+      lineinfile: dest=/etc/default/docker regexp='^DOCKER_OPTS="-H tcp://0\.0\.0\.0:4243 -H unix:///var/run/docker\.sock' line='DOCKER_OPTS="-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --insecure-registry {{docker_priv_reg_uri}}"' backup=yes
+      register: changeddockerconffile
+
+    - name: Restart docker if tcp options have changed
+      service: name=docker state=restarted
+      when: changeddockerconffile|changed
+
+    - command: "ps -ef"
+      register: ps_output
+
+    - command: "docker ps"
+      register: dockerps_output
+      when: "'/usr/bin/docker -d' in ps_output.stdout"
+
+    - name: "Start RethinkDB data volume"
+      command: "docker run -it -d --name shipyard-rethinkdb-data --entrypoint /bin/bash shipyard/rethinkdb -l"
+      when: "'/usr/bin/docker -d' in ps_output.stdout  and not ('shipyard-rethinkdb-data' in dockerps_output.stdout)"
+      register: rethinkdb_datavolume
+
+    - command: "docker ps"
+      register: dockerps_output
+      when: "'/usr/bin/docker -d' in ps_output.stdout"
+
+    - shell: "docker ps | awk '{print $NF}'"
+      register: dockerpsnames_output
+      when: "'/usr/bin/docker -d' in ps_output.stdout"
+      
+    - name: "Start RethinkDB container"
+      command: "docker run -p=32770:8080 -p=32769:28015 -p=32768:29015 -it -d --name shipyard-rethinkdb --volumes-from shipyard-rethinkdb-data shipyard/rethinkdb"
+      # Start only if shipyard-rethinkdb not present and shipyard-rethinkdb-data present in last column of docker ps
+      when: "'/usr/bin/docker -d' in ps_output.stdout  and ('shipyard-rethinkdb-data' in dockerpsnames_output.stdout) and not (dockerpsnames_output.stdout | search('shipyard-rethinkdb[\n|$]') )"
+      register: rethinkdb_container
+
+    - command: "docker ps"
+      register: dockerps_output
+      when: "'/usr/bin/docker -d' in ps_output.stdout"
+
+    - shell: "docker ps | awk '{print $NF}'"
+      register: dockerpsnames_output
+      when: "'/usr/bin/docker -d' in ps_output.stdout"
+
+    # TODO Replace this wait with a python program that polls rethinkdb until the table service_keys is ready
+    - name: Wait for shipyard to create tables
+      wait_for: timeout=10
+
+    - name: "Start Shipyard controller"
+      command: "docker run -i -t -p 8080:8080 -d --name shipyard --link shipyard-rethinkdb:rethinkdb shipyard/shipyard -disable-usage-info"
+      when: "'/usr/bin/docker -d' in ps_output.stdout and ('shipyard-rethinkdb-data' in dockerpsnames_output.stdout) and (dockerpsnames_output.stdout | search('shipyard-rethinkdb[\n|$]')) and not (dockerpsnames_output.stdout | search('shipyard[\n|$]'))"
+
+
+    # Install packer
+    - name: Download packer
+      get_url: url="https://dl.bintray.com/mitchellh/packer/packer_0.8.0_linux_amd64.zip" dest=/home/vagrant/packer_0.8.0_linux_amd64.zip validate_certs=no
+
+    - name: Install packer
+      unarchive: src=/home/vagrant/packer_0.8.0_linux_amd64.zip dest=/usr/local/bin copy=no creates=/usr/local/bin/packer
+
+    - name: Ensure dir for playbooks used by packer exists
+      file: path=/home/vagrant/playbooks state=directory owner=vagrant group=vagrant mode=0700
+
+    - name: Ensure dir for packer data exists
+      file: path=/home/vagrant/packer state=directory owner=vagrant group=vagrant mode=0700
+
+
+    # Install private registry
+
+    - name: Ensure docker dirs are present
+      file: dest={{item}} state=directory
+      with_items:
+        - "{{private_registry_mountpoint}}"
+        - "{{docker_priv_registry_path}}"
+        
+    - command: "ps -ef"
+      register: ps_output
+
+    - name: Retrieve docker ps list
+      shell: "docker ps | awk '{print $NF}'"
+      register: dockerpsnames_output
+      when: "'/usr/bin/docker -d' in ps_output.stdout"
+
+    - name: Copy script that inserts new API key to shipyard
+      template: src=templates/createapikey.j2 dest=/home/vagrant/createapikey.py owner=vagrant group-vagrant mode=0700
+
+    # TODO Replace this wait with a python program that polls rethinkdb until the table service_keys is ready
+    - name: Wait for shipyard to create tables
+      wait_for: timeout=10
+      
+    - name: Execute script
+      shell: /home/vagrant/createapikey.py chdir="/home/vagrant" executable="/bin/bash"
+      register: createnewapikey
+      ignore_errors: true
+      
+    - name: Check if this instance is registered as engine in shipyard
+      uri: >
+        url={{shipyard_url}}/api/engines
+        method=GET
+        HEADER_Content-Type="application/json"
+        HEADER_X-Service-Key={{shipyard_api_key}}
+        HEADER_Accept="application/json"
+        status_code=200
+        return_content=yes
+      register: current_engine_list
+
+    - name: Add instance to shipyard engine list if missing
+      uri: >
+        url={{shipyard_url}}/api/engines
+        method=POST
+        HEADER_Content-Type="application/json"
+        HEADER_X-Service-Key={{shipyard_api_key}}
+        HEADER_Accept="application/json"
+        status_code=201
+        return_content=yes
+        body='{ "ca_cert": "", "engine": { "addr": "http://{{ansible_eth0["ipv4"]["address"]}}:4243", "cpus": {{"%.1f"|format(ansible_processor_cores|float)}}, "id": "{{enginename}}", "labels": [ "privateregistry", "dockertutorial-01" ], "memory": {{ansible_memfree_mb}} }, "id": "local", "ssl_cert": "", "ssl_key": "" }'
+
+      register: added_dockerprivreg_to_shipyard
+      when: "not current_engine_list.content | search('privateregistry')"
+
+    # - debug: msg="{{added_dockerprivreg_to_shipyard}}"
+
+    - name: Retrieve list of containers
+      uri: >
+        url={{shipyard_url}}/api/containers
+        method=GET
+        HEADER_Content-Type="application/json"
+        HEADER_X-Service-Key={{shipyard_api_key}}
+        HEADER_Accept="application/json"
+        status_code=200
+        return_content=yes
+      register: current_container_list
+
+    - name: Retrieve docker images list
+      shell: "docker images"
+      register: dockerimages_output
+      when: "'/usr/bin/docker -d' in ps_output.stdout"
+
+    - name: Pull latest registry image
+      command: "docker pull registry:2"
+      when: "'registry' not in dockerimages_output.stdout"
+
+    - name: Run registry if missing
+      uri: >
+        url={{shipyard_url}}/api/containers
+        method=POST
+        HEADER_Content-Type="application/json"
+        HEADER_X-Service-Key={{shipyard_api_key}}
+        HEADER_Accept="application/json"
+        status_code=201
+        return_content=yes
+        body='{ "name": "registry:2", "cpus": 0.3, "memory": 0.0, "type": "service", "hostname": "", "domain": "", "labels": [ "privateregistry" ], "container_name": "dockerprivateregistry", "volumes": ["{{private_registry_mountpoint}}:{{docker_priv_registry_path}}"], "bind_ports": [{"container_port": 5000, "port": 5000, "proto": "tcp"}], "environment": { "STORAGE_PATH": "{{docker_priv_registry_path}}" }, "restart_policy": { "name": "always" } }'
+      when: "not current_container_list.content | search('dockerprivateregistry')"
+

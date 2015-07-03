@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+import uuid
+import string
+import random
+import rethinkdb as r
+import sys
+
+def id_generator(size=36, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+r.connect('localhost',32769).repl()
+
+cursor=r.db('shipyard').table('service_keys').run()
+
+if len(cursor.items) == 0:
+    newid = uuid.uuid1()
+    newkey = id_generator()
+
+    r.db('shipyard').table('service_keys').insert([ { "description": "Auto generated key", "id": "%s" % (newid,), "key": "{{shipyard_api_key}}" } ]).run()
+    sys.exit(1)
+
+# Uncomment the following to print the table entries
+# cursor=r.db('shipyard').table('service_keys').run()
+# for i in cursor:
+#     print i
+
+sys.exit(0)

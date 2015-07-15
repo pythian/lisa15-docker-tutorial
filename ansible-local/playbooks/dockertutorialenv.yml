@@ -227,6 +227,6 @@
         HEADER_Accept="application/json"
         status_code=201
         return_content=yes
-        body='{ "name": "gliderlabs/registrator", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "registrator", "domain": "", "container_name": "{{ansible_hostname}}-registrator", "args" : ["consul://192.168.123.140:8500"], "labels" : [ "dockertutorial-01" ], "restart_policy": { "name": "always" } }'
+        body='{ "name": "gliderlabs/registrator", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "registrator", "domain": "", "container_name": "{{ansible_hostname}}-registrator", "args" : ["consul://192.168.123.140:8500"], "labels" : [ "dockertutorial-01" ], "volumes": [ "/var/run/docker.sock:/tmp/docker.sock" ], "restart_policy": { "name": "always" } }'
       when: "not current_container_list.content | search('registrator')"
 

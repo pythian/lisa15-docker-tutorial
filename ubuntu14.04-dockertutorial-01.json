@@ -55,8 +55,11 @@
                 "scripts/packages.sh",
                 "scripts/network.sh",
                 "scripts/vagrant.sh"
-
             ]
+        },
+        {
+            "type" : "ansible-local",
+            "playbook_file" : "ansible-local/playbooks/predownload_inpacker.yml"
         }
     ],
 

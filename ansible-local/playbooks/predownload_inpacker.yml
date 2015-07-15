@@ -1,0 +1,109 @@
+- hosts: localhost
+  user: ubuntu
+  sudo: yes
+  vars:
+    private_registry_mountpoint: /dockerimages
+    docker_priv_registry_path: /registry
+    shipyard_url: "http://{{ansible_eth0['ipv4']['address']}}:8080"
+    shipyard_api_key: "IvIveFbGtVqrWCjQls8cy3pyLaZ73MWVEWSe"
+    docker_priv_reg_uri: "{{ansible_eth0['ipv4']['address']}}:5000"
+    enginename: privateregistry
+    haproxy_apt_repo: "ppa:vbernat/haproxy-1.5"
+    consul_template_version: 0.10.0
+    consul_template_instdir: /usr/local/bin/consul-template
+    consul_template_confdir: /etc/consul-template
+
+  tasks:
+    - name: Install python-pip package
+      apt: name=python-pip state=present
+
+    - name: Install unzip package
+      apt: name=unzip state=present
+
+    - name: Install httplib2 pip module
+      pip: name=httplib2
+
+    - name: Install rethinkdb python driver
+      pip: name=rethinkdb
+
+    - name: Import key for new docker apt repo
+      apt_key:  keyserver="hkp://keyserver.ubuntu.com:80" id=36A1D7869245C8950F966E92D8576A8BA88D21E9
+
+    - name: Install docker apt repo
+      apt_repository: repo='deb https://get.docker.io/ubuntu docker main' state=present update_cache=yes
+
+    - name: Install docker onto 14.04
+      apt:
+        pkg: lxc-docker
+        force: yes
+        state: present
+        cache_valid_time: 600
+      register: docker_package
+      when: "ansible_distribution_version == '14.04'"
+
+    - name: Pull needed docker containers
+      shell: "docker pull {{item}}"
+      args:
+        chdir: /home/vagrant
+      with_items:
+        - "gliderlabs/registrator:latest"
+        - "shipyard/rethinkdb"
+        - "shipyard/shipyard"
+        - "progrium/consul"
+        - "registry:2"
+
+    # Install packer
+    - name: Download packer
+      get_url: url="https://dl.bintray.com/mitchellh/packer/packer_0.8.0_linux_amd64.zip" dest=/home/vagrant/packer_0.8.0_linux_amd64.zip validate_certs=no
+
+    - name: Install packer
+      unarchive: src=/home/vagrant/packer_0.8.0_linux_amd64.zip dest=/usr/local/bin copy=no creates=/usr/local/bin/packer
+
+    - name: Ensure dir for playbooks used by packer exists
+      file: path=/home/vagrant/playbooks state=directory owner=vagrant group=vagrant mode=0700
+
+    - name: Ensure dir for packer data exists
+      file: path=/home/vagrant/packer state=directory owner=vagrant group=vagrant mode=0700
+
+    # Install consul-template
+    - name: Ensure tmp dir for consul template download exists
+      file: path=/home/vagrant/tmp state=directory owner=vagrant group=vagrant mode=0770
+
+    - name: Download consul-template executable
+      get_url: url="https://github.com/hashicorp/consul-template/releases/download/v{{consul_template_version}}/consul-template_{{consul_template_version}}_linux_amd64.tar.gz" dest="/home/vagrant/tmp/consul-template_{{consul_template_version}}_linux_amd64.tar.gz" validate_certs=no
+      sudo: no
+
+    - name: Extract consul-template executable
+      unarchive: src="/home/vagrant/tmp/consul-template_{{consul_template_version}}_linux_amd64.tar.gz" dest=/home/vagrant/tmp copy=no creates="{{consul_template_instdir}}" owner=vagrant group=vagrant
+      sudo: no
+
+    - name: Copy consul-template executable to /usr/local/bin if missing
+      shell: "cp /home/vagrant/tmp/consul-template_{{consul_template_version}}_linux_amd64/consul-template /usr/local/bin/"
+      args:
+        chdir: /home/vagrant
+        creates: "{{consul_template_instdir}}"
+
+    - name: Ensure tmp dir for consul template config file exists
+      file: path={{consul_template_confdir}} state=directory owner=root group=root mode=0700
+
+    - name: Ensure log dir for consul-template exists
+      file: path=/var/log/consul-template state=directory owner=root group=root mode=0755
+
+    # Install haproxy
+    - name: Install curl and other utilities
+      apt: pkg={{item}} force=yes update_cache=yes
+      with_items:
+        - curl
+        - supervisor
+
+    - name: haproxy_ppa | Add the haproxy PPA repository
+      apt_repository:
+        repo: "{{ haproxy_apt_repo }}"
+        state: present
+      when: ansible_distribution == "Ubuntu" and ( {{ansible_distribution_version | version_compare('14.04','>=') }} )
+
+    - name: haproxy | Install the haproxy package
+      apt:
+        pkg: haproxy
+        state: present
+  

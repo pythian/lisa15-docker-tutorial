@@ -69,8 +69,9 @@
       when: "'/usr/bin/docker -d' in ps_output.stdout"
 
     # TODO Replace this wait with a python program that polls rethinkdb until the table service_keys is ready
-    - name: Wait for rethinkdb to create tables
+    - name: Wait until rethinkdb is up and running (and tables have been created)
       wait_for: timeout=15
+      #wait_for: host=0.0.0.0 port=32768 state=drained
 
     - name: "Start Shipyard controller"
       command: "docker run -i -t -p 8080:8080 -d --name shipyard --link shipyard-rethinkdb:rethinkdb shipyard/shipyard -disable-usage-info"
@@ -96,8 +97,7 @@
     - name: Copy script that inserts new API key to shipyard
       template: src=templates/createapikey.j2 dest=/home/vagrant/createapikey.py owner=vagrant group-vagrant mode=0700
 
-    # TODO Replace this wait with a python program that polls rethinkdb until the table service_keys is ready
-    - name: Wait 20 sec before creating api key in shipyard
+    - name: Wait 15 sec before creating api key in shipyard
       wait_for: timeout=15
       
     - name: Execute script

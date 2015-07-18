@@ -22,7 +22,7 @@ $forwarded_ports = {}
 Vagrant.configure("2") do |config|
   config.vm.define "dockertutorial-01", autostart: true do |i|
     i.vm.box = "dockertutorial-01"
-    i.vm.network :public_network, :dev => "em1", :mode => "bridge"
+    # i.vm.network :public_network, :dev => "em1", :mode => "bridge"
     i.vm.hostname = "dockertutorial-01"
     i.vm.synced_folder './ansible-local','/vagrant', type: 'rsync'
     i.vm.provider :libvirt do |domain|
@@ -34,11 +34,16 @@ Vagrant.configure("2") do |config|
       domain.management_network_name = "vagrant"
       domain.management_network_address = "192.168.123.0/24"
     end
+    i.vm.provider :virtualbox do |v|
+      v.memory = 1024
+      v.cpus = 2
+    end
     config.vm.network :private_network, ip: "192.168.123.140"
 
     config.vm.provision "shell",
       inline: "ansible-playbook /vagrant/playbooks/dockertutorialenv.yml"
   end
+
 
   config.vm.define "dockertutorial-02", autostart: true do |i|
     i.vm.box = "dockertutorial-02"

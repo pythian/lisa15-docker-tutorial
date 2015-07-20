@@ -6,7 +6,7 @@
     docker_priv_registry_path: /registry
     shipyard_url: "http://{{ansible_eth0['ipv4']['address']}}:8080"
     shipyard_api_key: "IvIveFbGtVqrWCjQls8cy3pyLaZ73MWVEWSe"
-    docker_priv_reg_uri: "{{ansible_eth0['ipv4']['address']}}:5000"
+    docker_privreg_uri: "192.168.123.140:5000"
     enginename: privateregistry
     haproxy_apt_repo: "ppa:vbernat/haproxy-1.5"
     consul_template_version: 0.3.1
@@ -27,7 +27,7 @@
     #   pip: name=rethinkdb
 
     - name: Allow docker to run also on tcp
-      lineinfile: dest=/etc/default/docker regexp='^DOCKER_OPTS="-H tcp://0\.0\.0\.0:4243 -H unix:///var/run/docker\.sock' line='DOCKER_OPTS="-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --insecure-registry {{docker_priv_reg_uri}}"' backup=yes
+      lineinfile: dest=/etc/default/docker regexp='^DOCKER_OPTS="-H tcp://0\.0\.0\.0:4243 -H unix:///var/run/docker\.sock' line='DOCKER_OPTS="-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --insecure-registry {{docker_privreg_uri}}"' backup=yes
       register: changeddockerconffile
 
     - name: Restart docker if tcp options have changed

@@ -1,0 +1,41 @@
+---
+- hosts: 127.0.0.1
+  user: vagrant
+  sudo: yes
+  vars:
+    dockerprivregistry: "192.168.123.140:5000"
+    docker_img_name: "basepython"
+    ansiblerepo_basedir: "ansible_build_deploy"
+    build_tmpdir: "tmp_packer_playbooks"
+    packer_jsonfile: "basepython_packerdef_using_ansible"
+    docker_localansibletasks: "local_install_python"
+  tasks:
+    - set_fact:
+        rnd: "{{9999999 | random}}"
+
+    - debug: msg="Random suffix is {{rnd}}"
+
+    - name: Ensure dir for playbooks used by packer exists
+      file: path="/home/vagrant/{{build_tmpdir}}" state=directory owner=vagrant group=vagrant mode=0700
+      
+    - name: Copy needed packer def file
+      template: src="packer/{{packer_jsonfile}}.json.j2" dest="../{{build_tmpdir}}/{{packer_jsonfile}}{{rnd}}.json" owner=vagrant group=vagrant
+
+    - name: Copy local installation playbook
+      template: src="packer/{{docker_localansibletasks}}.yml.j2" dest="../{{build_tmpdir}}/{{docker_localansibletasks}}{{rnd}}.yml"
+
+    # - name: Copy needed roles used by packer
+    #   copy: src=../roles/whatever.smth dest=wherever owner=ubuntu group=ubuntu
+
+    - name: Execute packer using definition file
+      shell: PATH=$PATH:/usr/local/bin && packer build "{{build_tmpdir}}/{{packer_jsonfile}}{{rnd}}.json"
+      args:
+        chdir: /home/vagrant
+
+    - name: "Get docker images output"
+      shell: "docker images"
+      register: dockerps
+
+    - name: Clean up untagged dangling docker images
+      shell: 'docker rmi $( docker images -q --filter "dangling=true" )'
+      when: "'<none>' in dockerps.stdout"

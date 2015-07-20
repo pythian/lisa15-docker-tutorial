@@ -1,0 +1,28 @@
+{
+    "builders":[{
+        "type": "docker",
+        "image": "ansible/ubuntu14.04-ansible:1.8",
+        "export_path": "image{{99999999 | random}}.tar"
+    }],
+    "provisioners":[
+        {
+            "type": "ansible-local",
+            "playbook_file": "{{build_tmpdir}}/{{docker_localansibletasks}}{{rnd}}.yml",
+            "playbook_dir": "{{build_tmpdir}}"
+	        {# "role_paths": [  #}
+		    {#     "roles/this", #}
+            {#     "roles/that" #}
+	        {# ] #}
+        }
+    ],
+    "post-processors": [
+    [
+        {
+            "type": "docker-import",
+            "repository": "{{dockerprivregistry}}/{{docker_img_name}}",
+            "tag": "latest"
+        },
+        "docker-push"
+    ]
+    ]
+}

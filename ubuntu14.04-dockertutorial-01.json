@@ -2,7 +2,7 @@
     "variables": {
         "user": "vagrant",
         "password": "vagrant",
-        "disk_size": 40000
+        "disk_size": "40000"
     },
 
     "builders":

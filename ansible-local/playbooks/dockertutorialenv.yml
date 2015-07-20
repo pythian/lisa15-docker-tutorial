@@ -116,6 +116,9 @@
         return_content=yes
       register: current_engine_list
 
+    - name: Wait till shipyard api is listening
+      wait_for: host=0.0.0.0 port=8080 state=drained
+
     - name: Add instance to shipyard engine list if missing
       uri: >
         url={{shipyard_url}}/api/engines

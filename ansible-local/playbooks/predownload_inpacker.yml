@@ -54,10 +54,10 @@
 
     # Install packer
     - name: Download packer
-      get_url: url="https://dl.bintray.com/mitchellh/packer/packer_0.8.0_linux_amd64.zip" dest=/home/vagrant/packer_0.8.0_linux_amd64.zip validate_certs=no
+      get_url: url="https://dl.bintray.com/mitchellh/packer/packer_0.8.2_linux_amd64.zip" dest=/home/vagrant/packer_0.8.2_linux_amd64.zip validate_certs=no
 
     - name: Install packer
-      unarchive: src=/home/vagrant/packer_0.8.0_linux_amd64.zip dest=/usr/local/bin copy=no creates=/usr/local/bin/packer
+      unarchive: src=/home/vagrant/packer_0.8.2_linux_amd64.zip dest=/usr/local/bin copy=no creates=/usr/local/bin/packer
 
     - name: Ensure dir for playbooks used by packer exists
       file: path=/home/vagrant/playbooks state=directory owner=vagrant group=vagrant mode=0700

@@ -17,4 +17,4 @@ mount -t iso9660 -o loop /home/vagrant/VBoxGuestAdditions.iso /tmp/isomount
 
 # Cleanup
 umount isomount
-rm -rf isomount /root/VBoxGuestAdditions.iso
+rm -rf isomount /home/vagrant/VBoxGuestAdditions.iso

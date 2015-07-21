@@ -24,11 +24,11 @@ Vagrant.configure("2") do |config|
     i.vm.box = "dockertutorial"
     # i.vm.network :public_network, :dev => "em1", :mode => "bridge"
     i.vm.hostname = "dockertutorial-01"
-    i.vm.provider :libvirt do |domain|
+    i.vm.provider :libvirt do |domain, override|
       # Remember to run with --provider=libvirt otherwise Vagrant will execute also the virtualbox section!
-      i.vm.synced_folder '.', '/vagrant', disabled: true
-      i.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'rsync'
-      i.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'rsync', create: true
+      override.vm.synced_folder '.', '/vagrant', disabled: true
+      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'rsync'
+      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'rsync', create: true
       domain.driver = "kvm"
       #domain.host = "atreas.lan"
       domain.storage_pool_name = "default"
@@ -37,11 +37,11 @@ Vagrant.configure("2") do |config|
       domain.management_network_name = "vagrant"
       domain.management_network_address = "192.168.123.0/24"
     end
-    i.vm.provider :virtualbox do |v|
+    i.vm.provider :virtualbox do |v, override|
       # Use virtualbox synced folders, should work in all operating systems
-      i.vm.synced_folder '.', '/vagrant', disabled: true
-      i.vm.synced_folder './ansible-local/','/tmp/vagrantupansible'
-      i.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', create: true
+      override.vm.synced_folder '.', '/vagrant', disabled: true
+      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible'
+      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', create: true
       v.memory = 1024
       v.cpus = 2
     end

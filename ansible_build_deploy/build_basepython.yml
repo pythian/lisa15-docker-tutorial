@@ -16,7 +16,7 @@
     - debug: msg="Random suffix is {{rnd}}"
 
     - name: Ensure dir for playbooks used by packer exists
-      file: path="/home/vagrant/{{build_tmpdir}}" state=directory owner=vagrant group=vagrant mode=0700
+      file: path="/vagrant/{{build_tmpdir}}" state=directory owner=vagrant group=vagrant mode=0700
       
     - name: Copy needed packer def file
       template: src="packer/{{packer_jsonfile}}.json.j2" dest="../{{build_tmpdir}}/{{packer_jsonfile}}{{rnd}}.json" owner=vagrant group=vagrant
@@ -30,7 +30,7 @@
     - name: Execute packer using definition file
       shell: PATH=$PATH:/usr/local/bin && packer build "{{build_tmpdir}}/{{packer_jsonfile}}{{rnd}}.json"
       args:
-        chdir: /home/vagrant
+        chdir: /vagrant
 
     - name: "Get docker images output"
       shell: "docker images"

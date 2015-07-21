@@ -4,9 +4,10 @@
   vars:
     private_registry_mountpoint: /dockerimages
     docker_priv_registry_path: /registry
-    shipyard_url: "http://{{ansible_eth0['ipv4']['address']}}:8080"
+    dockertutorial01_shipyard_ip: "192.168.123.140"
+    dockertutorial01_shipyard_url: "http://{{dockertutorial01_shipyard_ip}}:8080"
     shipyard_api_key: "IvIveFbGtVqrWCjQls8cy3pyLaZ73MWVEWSe"
-    docker_privreg_uri: "192.168.123.140:5000"
+    docker_privreg_uri: "{{dockertutorial01_shipyard_ip}}:5000"
     enginename: privateregistry
     haproxy_apt_repo: "ppa:vbernat/haproxy-1.5"
     consul_template_version: 0.3.1
@@ -107,7 +108,7 @@
       
     - name: Check if this instance is registered as engine in shipyard
       uri: >
-        url={{shipyard_url}}/api/engines
+        url={{dockertutorial01_shipyard_url}}/api/engines
         method=GET
         HEADER_Content-Type="application/json"
         HEADER_X-Service-Key={{shipyard_api_key}}
@@ -121,14 +122,14 @@
 
     - name: Add instance to shipyard engine list if missing
       uri: >
-        url={{shipyard_url}}/api/engines
+        url={{dockertutorial01_shipyard_url}}/api/engines
         method=POST
         HEADER_Content-Type="application/json"
         HEADER_X-Service-Key={{shipyard_api_key}}
         HEADER_Accept="application/json"
         status_code=201
         return_content=yes
-        body='{ "ca_cert": "", "engine": { "addr": "http://{{ansible_eth0["ipv4"]["address"]}}:4243", "cpus": {{"%.1f"|format(ansible_processor_cores|float)}}, "id": "{{enginename}}", "labels": [ "privateregistry", "dockertutorial-01" ], "memory": {{ansible_memfree_mb}} }, "id": "local", "ssl_cert": "", "ssl_key": "" }'
+        body='{ "ca_cert": "", "engine": { "addr": "http://{{dockertutorial01_shipyard_ip}}:4243", "cpus": {{"%.1f"|format(ansible_processor_cores|float)}}, "id": "{{enginename}}", "labels": [ "privateregistry", "dockertutorial-01" ], "memory": {{ansible_memfree_mb}} }, "id": "local", "ssl_cert": "", "ssl_key": "" }'
 
       register: added_dockerprivreg_to_shipyard
       when: "not current_engine_list.content | search('privateregistry')"
@@ -137,7 +138,7 @@
 
     - name: Retrieve list of containers
       uri: >
-        url={{shipyard_url}}/api/containers
+        url={{dockertutorial01_shipyard_url}}/api/containers
         method=GET
         HEADER_Content-Type="application/json"
         HEADER_X-Service-Key={{shipyard_api_key}}
@@ -148,7 +149,7 @@
 
     - name: Run registry if missing
       uri: >
-        url={{shipyard_url}}/api/containers
+        url={{dockertutorial01_shipyard_url}}/api/containers
         method=POST
         HEADER_Content-Type="application/json"
         HEADER_X-Service-Key={{shipyard_api_key}}
@@ -163,7 +164,7 @@
 
     - name: Start consul node1
       uri: >
-        url={{shipyard_url}}/api/containers
+        url={{dockertutorial01_shipyard_url}}/api/containers
         method=POST
         HEADER_Content-Type="application/json"
         HEADER_X-Service-Key={{shipyard_api_key}}
@@ -178,7 +179,7 @@
 
     - name: Start consul node2
       uri: >
-        url={{shipyard_url}}/api/containers
+        url={{dockertutorial01_shipyard_url}}/api/containers
         method=POST
         HEADER_Content-Type="application/json"
         HEADER_X-Service-Key={{shipyard_api_key}}
@@ -190,7 +191,7 @@
 
     - name: Start consul node3
       uri: >
-        url={{shipyard_url}}/api/containers
+        url={{dockertutorial01_shipyard_url}}/api/containers
         method=POST
         HEADER_Content-Type="application/json"
         HEADER_X-Service-Key={{shipyard_api_key}}
@@ -202,7 +203,7 @@
 
     - name: Start consul client agent, expose ui in port 8500:/ui
       uri: >
-        url={{shipyard_url}}/api/containers
+        url={{dockertutorial01_shipyard_url}}/api/containers
         method=POST
         HEADER_Content-Type="application/json"
         HEADER_X-Service-Key={{shipyard_api_key}}
@@ -214,7 +215,7 @@
 
     - name: Start gliderlabs/registrator
       uri: >
-        url={{shipyard_url}}/api/containers
+        url={{dockertutorial01_shipyard_url}}/api/containers
         method=POST
         HEADER_Content-Type="application/json"
         HEADER_X-Service-Key={{shipyard_api_key}}

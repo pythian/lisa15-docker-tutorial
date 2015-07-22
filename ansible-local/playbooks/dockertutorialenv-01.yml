@@ -9,10 +9,6 @@
     shipyard_api_key: "IvIveFbGtVqrWCjQls8cy3pyLaZ73MWVEWSe"
     docker_privreg_uri: "{{dockertutorial01_shipyard_ip}}:5000"
     enginename: privateregistry
-    haproxy_apt_repo: "ppa:vbernat/haproxy-1.5"
-    consul_template_version: 0.3.1
-    consul_template_instdir: /usr/local/bin/consul-template
-    consul_template_confdir: /etc/consul-template
     docker0_ip_addr: "{{ansible_docker0['ipv4']['address']}}"
   tasks:
     # - name: Install python-pip package

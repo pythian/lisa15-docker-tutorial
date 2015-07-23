@@ -16,6 +16,12 @@ Libvirt:
 packer build ubuntu14.04-dockertutorial-01.json
 ```
 
+Virtualbox:
+
+```bash
+packer build vbox-ubuntu14.04-dockertutorial-01.json
+```
+
 As an option if you want to create a new user e.g. ubuntu use:
 
 ```bash
@@ -29,16 +35,21 @@ Libvirt:
 
 Run:
 
-vagrant up dockertutorial-01 --provider=libvirt
+vagrant up dockertutorial --provider=libvirt --no-parallel
 
-Note: this will take some time to execute, depending on your internet connection, as it will pull and provision the needed docker repositories
+Virtualbox:
+
+Run:
+
+vagrant up dockertutorial --provider=virtualbox --no-parallel
 
 ## Preconfigured IP addresses:
 
-| Vagrant VM name   | IP Address      |
+| Vagrant VM name   |      IP Address |
 | ---------------   | --------------- |
 | dockertutorial-01 | 192.168.123.140 |
 | dockertutorial-02 | 192.168.123.141 |
+| dockertutorial-03 | 192.168.123.142 |
 
 ## Software installed:
 
@@ -64,6 +75,24 @@ Check scripts/packages.sh:
 |                   | packer                    |
 |                   | ansible                   |
 |                   | docker private registry:2 |
-|                   | consul                    |
-|                   | consul-registrator        |
+|                   | consul server agent       |
+|                   | registrator               |
+|                   | consul-template           |
+
+| Vagrant VM name   | Software installed        |
+| ----------------- | ------------------------- |
+| dockertutorial-02 | docker                    |
+|                   | packer                    |
+|                   | ansible                   |
+|                   | consul server agent       |
+|                   | registrator               |
+|                   | consul-template           |
+
+| Vagrant VM name   | Software installed        |
+| ----------------- | ------------------------- |
+| dockertutorial-03 | docker                    |
+|                   | packer                    |
+|                   | ansible                   |
+|                   | consul server agent       |
+|                   | registrator               |
 |                   | consul-template           |

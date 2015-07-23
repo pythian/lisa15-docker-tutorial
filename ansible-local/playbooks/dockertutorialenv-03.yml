@@ -8,9 +8,9 @@
     dockertutorial01_shipyard_url: "http://{{dockertutorial01_shipyard_ip}}:8080"
     shipyard_api_key: "IvIveFbGtVqrWCjQls8cy3pyLaZ73MWVEWSe"
     docker_privreg_uri: "{{dockertutorial01_shipyard_ip}}:5000"
-    enginename: "dockertutorial-02"
+    enginename: "dockertutorial-03"
     docker0_ip_addr: "{{ansible_docker0['ipv4']['address']}}"
-    dockertutorial02_ip: "192.168.123.141"
+    dockertutorial03_ip: "192.168.123.142"
   tasks:
     - name: Allow docker to run also on tcp
       lineinfile: dest=/etc/default/docker regexp='^DOCKER_OPTS="-H tcp://0\.0\.0\.0:4243 -H unix:///var/run/docker\.sock' line='DOCKER_OPTS="-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --insecure-registry {{docker_privreg_uri}}"' backup=yes
@@ -43,7 +43,7 @@
         HEADER_Accept="application/json"
         status_code=201
         return_content=yes
-        body='{ "ca_cert": "", "engine": { "addr": "http://{{dockertutorial02_ip}}:4243", "cpus": {{"%.1f"|format(ansible_processor_cores|float)}}, "id": "{{enginename}}", "labels": [ "{{enginename}}" ], "memory": {{ansible_memfree_mb}} }, "id": "{{enginename}}", "ssl_cert": "", "ssl_key": "" }'
+        body='{ "ca_cert": "", "engine": { "addr": "http://{{dockertutorial03_ip}}:4243", "cpus": {{"%.1f"|format(ansible_processor_cores|float)}}, "id": "{{enginename}}", "labels": [ "{{enginename}}" ], "memory": {{ansible_memfree_mb}} }, "id": "{{enginename}}", "ssl_cert": "", "ssl_key": "" }'
       register: added_engine_to_shipyard
       when: "not current_engine_list.content | search('{{enginename}}')"
 
@@ -58,7 +58,7 @@
         return_content=yes
       register: current_container_list
 
-    - name: Start consul node2
+    - name: Start consul node3
       uri: >
         url={{dockertutorial01_shipyard_url}}/api/containers
         method=POST
@@ -67,8 +67,8 @@
         HEADER_Accept="application/json"
         status_code=201,409,500
         return_content=yes
-        body='{ "name": "progrium/consul", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "consulserver-02", "domain": "", "container_name": "consulserver-02", "bind_ports": [{"host_ip" : "{{dockertutorial02_ip}}", "container_port": 8301, "port": 8301, "proto": "udp"},{"host_ip" : "{{dockertutorial02_ip}}", "container_port": 8302, "port": 8302, "proto": "udp"}, {"host_ip" : "{{dockertutorial02_ip}}", "container_port": 8300, "port": 8300, "proto": "tcp"}, {"host_ip" : "{{dockertutorial02_ip}}", "container_port": 8301, "port": 8301, "proto": "tcp"},{"host_ip" : "{{dockertutorial02_ip}}", "container_port": 8302, "port": 8302, "proto": "tcp"}, {"host_ip" : "{{dockertutorial02_ip}}", "container_port": 8400, "port": 8400}, {"host_ip" : "{{dockertutorial02_ip}}", "container_port": 8500, "port": 8500}], "args" : ["-server","-advertise {{dockertutorial02_ip}}","-ui-dir /ui","-join {{dockertutorial01_shipyard_ip}}"], "labels" : [ "{{enginename}}" ], "restart_policy": { "name": "always" } }'
-      when: "not current_container_list.content | search('consulserver-02')"
+        body='{ "name": "progrium/consul", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "consulserver-03", "domain": "", "container_name": "consulserver-03", "bind_ports": [{"host_ip" : "{{dockertutorial03_ip}}", "container_port": 8301, "port": 8301, "proto": "udp"},{"host_ip" : "{{dockertutorial03_ip}}", "container_port": 8302, "port": 8302, "proto": "udp"}, {"host_ip" : "{{dockertutorial03_ip}}", "container_port": 8300, "port": 8300, "proto": "tcp"}, {"host_ip" : "{{dockertutorial03_ip}}", "container_port": 8301, "port": 8301, "proto": "tcp"},{"host_ip" : "{{dockertutorial03_ip}}", "container_port": 8302, "port": 8302, "proto": "tcp"}, {"host_ip" : "{{dockertutorial03_ip}}", "container_port": 8400, "port": 8400}, {"host_ip" : "{{dockertutorial03_ip}}", "container_port": 8500, "port": 8500}], "args" : ["-server","-advertise {{dockertutorial03_ip}}","-ui-dir /ui","-join {{dockertutorial01_shipyard_ip}}"], "labels" : [ "{{enginename}}" ], "restart_policy": { "name": "always" } }'
+      when: "not current_container_list.content | search('consulserver-03')"
 
     - name: Start gliderlabs/registrator
       uri: >
@@ -79,7 +79,7 @@
         HEADER_Accept="application/json"
         status_code=201,409,500
         return_content=yes
-        body='{ "name": "gliderlabs/registrator", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "registrator", "domain": "", "container_name": "{{ansible_hostname}}-registrator", "args" : ["consul://{{dockertutorial02_ip}}:8500"], "labels" : [ "{{enginename}}" ], "volumes": [ "/var/run/docker.sock:/tmp/docker.sock" ], "restart_policy": { "name": "always" } }'
+        body='{ "name": "gliderlabs/registrator", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "registrator", "domain": "", "container_name": "{{ansible_hostname}}-registrator", "args" : ["consul://{{dockertutorial03_ip}}:8500"], "labels" : [ "{{enginename}}" ], "volumes": [ "/var/run/docker.sock:/tmp/docker.sock" ], "restart_policy": { "name": "always" } }'
       #TODO: container list should only show containers for this vm
       #when: "not current_container_list.content | search('registrator')"
 

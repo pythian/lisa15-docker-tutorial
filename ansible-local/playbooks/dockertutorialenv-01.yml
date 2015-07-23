@@ -8,21 +8,10 @@
     dockertutorial01_shipyard_url: "http://{{dockertutorial01_shipyard_ip}}:8080"
     shipyard_api_key: "IvIveFbGtVqrWCjQls8cy3pyLaZ73MWVEWSe"
     docker_privreg_uri: "{{dockertutorial01_shipyard_ip}}:5000"
-    enginename: privateregistry
+    enginename: "dockertutorial-01"
     docker0_ip_addr: "{{ansible_docker0['ipv4']['address']}}"
+    dockertutorial01_ip: "{{dockertutorial01_shipyard_ip}}"
   tasks:
-    # - name: Install python-pip package
-    #   apt: name=python-pip state=present update_cache=yes
-
-    # - name: Install unzip package
-    #   apt: name=unzip state=present
-
-    # - name: Install httplib2 pip module
-    #   pip: name=httplib2
-
-    # - name: Install rethinkdb python driver
-    #   pip: name=rethinkdb
-
     - name: Allow docker to run also on tcp
       lineinfile: dest=/etc/default/docker regexp='^DOCKER_OPTS="-H tcp://0\.0\.0\.0:4243 -H unix:///var/run/docker\.sock' line='DOCKER_OPTS="-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --insecure-registry {{docker_privreg_uri}}"' backup=yes
       register: changeddockerconffile
@@ -116,7 +105,7 @@
     - name: Wait till shipyard api is listening
       wait_for: host=0.0.0.0 port=8080 state=drained
 
-    - name: Add instance to shipyard engine list if missing
+    - name: Add vm to shipyard engine list if missing
       uri: >
         url={{dockertutorial01_shipyard_url}}/api/engines
         method=POST
@@ -125,10 +114,10 @@
         HEADER_Accept="application/json"
         status_code=201
         return_content=yes
-        body='{ "ca_cert": "", "engine": { "addr": "http://{{dockertutorial01_shipyard_ip}}:4243", "cpus": {{"%.1f"|format(ansible_processor_cores|float)}}, "id": "{{enginename}}", "labels": [ "privateregistry", "dockertutorial-01" ], "memory": {{ansible_memfree_mb}} }, "id": "local", "ssl_cert": "", "ssl_key": "" }'
+        body='{ "ca_cert": "", "engine": { "addr": "http://{{dockertutorial01_shipyard_ip}}:4243", "cpus": {{"%.1f"|format(ansible_processor_cores|float)}}, "id": "{{enginename}}", "labels": [ "{{enginename}}" ], "memory": {{ansible_memfree_mb}} }, "id": "local", "ssl_cert": "", "ssl_key": "" }'
 
       register: added_dockerprivreg_to_shipyard
-      when: "not current_engine_list.content | search('privateregistry')"
+      when: "not current_engine_list.content | search('{{enginename}}')"
 
     # - debug: msg="{{added_dockerprivreg_to_shipyard}}"
 
@@ -152,7 +141,7 @@
         HEADER_Accept="application/json"
         status_code=201,409,500
         return_content=yes
-        body='{ "name": "registry:2", "cpus": 0.3, "memory": 0.0, "type": "service", "hostname": "", "domain": "", "labels": [ "privateregistry" ], "container_name": "dockerprivateregistry", "volumes": ["{{private_registry_mountpoint}}:{{docker_priv_registry_path}}"], "bind_ports": [{"container_port": 5000, "port": 5000, "proto": "tcp"}], "environment": { "STORAGE_PATH": "{{docker_priv_registry_path}}" }, "restart_policy": { "name": "always" } }'
+        body='{ "name": "registry:2", "cpus": 0.3, "memory": 0.0, "type": "service", "hostname": "", "domain": "", "labels": [ "{{enginename}}" ], "container_name": "dockerprivateregistry", "volumes": ["{{private_registry_mountpoint}}:{{docker_priv_registry_path}}"], "bind_ports": [{"container_port": 5000, "port": 5000, "proto": "tcp"}], "environment": { "STORAGE_PATH": "{{docker_priv_registry_path}}" }, "restart_policy": { "name": "always" } }'
       when: "not current_container_list.content | search('dockerprivateregistry')"
 
     - name: Wait till registry is listening
@@ -167,47 +156,11 @@
         HEADER_Accept="application/json"
         status_code=201,409,500
         return_content=yes
-        body='{ "name": "progrium/consul", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "consulserver-01", "domain": "", "container_name": "consulserver-01", "bind_ports": [{"container_port": 8301, "port": 8301, "proto": "udp"},{"container_port": 8302, "port": 8302, "proto": "tcp"}, {"container_port": 8300, "port": 8300, "proto": "tcp"},{"container_port": 8301, "port": 8301, "proto": "tcp"},{"container_port": 8302, "port": 8302, "proto": "tcp"}], "args" : ["-server","-bootstrap-expect 3"], "labels" : [ "dockertutorial-01" ], "restart_policy": { "name": "always" } }'
-      when: "not current_container_list.content | search('consulserveragent-01')"
+        body='{ "name": "progrium/consul", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "consulserver-01", "domain": "", "container_name": "consulserver-01", "bind_ports": [{"host_ip" : "{{dockertutorial01_ip}}", "container_port": 8301, "port": 8301, "proto": "udp"},{"host_ip" : "{{dockertutorial01_ip}}", "container_port": 8302, "port": 8302, "proto": "udp"}, {"host_ip" : "{{dockertutorial01_ip}}", "container_port": 8300, "port": 8300, "proto": "tcp"}, {"host_ip" : "{{dockertutorial01_ip}}", "container_port": 8301, "port": 8301, "proto": "tcp"},{"host_ip" : "{{dockertutorial01_ip}}", "container_port": 8302, "port": 8302, "proto": "tcp"}, {"host_ip" : "{{dockertutorial01_ip}}", "container_port": 8400, "port": 8400}, {"host_ip" : "{{dockertutorial01_ip}}", "container_port": 8500, "port": 8500}], "args" : ["-server","-bootstrap-expect 3","-advertise {{dockertutorial01_ip}}","-ui-dir /ui"], "labels" : [ "dockertutorial-01" ], "restart_policy": { "name": "always" } }'
+      when: "not current_container_list.content | search('consulserver-01')"
 
     - name: Wait for consul agent server1 to start listening
       wait_for: host=0.0.0.0 port=8300 state=drained
-
-    - name: Start consul node2
-      uri: >
-        url={{dockertutorial01_shipyard_url}}/api/containers
-        method=POST
-        HEADER_Content-Type="application/json"
-        HEADER_X-Service-Key={{shipyard_api_key}}
-        HEADER_Accept="application/json"
-        status_code=201,409,500
-        return_content=yes
-        body='{ "name": "progrium/consul", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "consulserver-02", "domain": "", "container_name": "consulserver-02", "args" : ["-server","-join 192.168.123.140"], "labels" : [ "dockertutorial-01" ], "restart_policy": { "name": "always" } }'
-      when: "not current_container_list.content | search('consulserveragent-02')"
-
-    - name: Start consul node3
-      uri: >
-        url={{dockertutorial01_shipyard_url}}/api/containers
-        method=POST
-        HEADER_Content-Type="application/json"
-        HEADER_X-Service-Key={{shipyard_api_key}}
-        HEADER_Accept="application/json"
-        status_code=201,409,500
-        return_content=yes
-        body='{ "name": "progrium/consul", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "consulserver-03", "domain": "", "container_name": "consulserver-03", "args" : ["-server","-join 192.168.123.140"], "labels" : [ "dockertutorial-01" ], "restart_policy": { "name": "always" } }'
-      when: "not current_container_list.content | search('consulserveragent-03')"
-
-    - name: Start consul client agent, expose ui in port 8500:/ui
-      uri: >
-        url={{dockertutorial01_shipyard_url}}/api/containers
-        method=POST
-        HEADER_Content-Type="application/json"
-        HEADER_X-Service-Key={{shipyard_api_key}}
-        HEADER_Accept="application/json"
-        status_code=201,409,500
-        return_content=yes
-        body='{ "name": "progrium/consul", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "consulclient-01", "domain": "", "container_name": "consulclient-01", "args" : ["-join 192.168.123.140","-ui-dir /ui"], "bind_ports": [{"container_port": 8400, "port": 8400, "proto": "tcp"}, {"container_port": 8500, "port": 8500, "proto": "tcp"}, {"container_port": 8600, "port": 53, "proto": "udp"}], "labels" : [ "dockertutorial-01" ], "restart_policy": { "name": "always" } }'
-      when: "not current_container_list.content | search('consulclientagent-04')"
 
     - name: Start gliderlabs/registrator
       uri: >
@@ -218,6 +171,7 @@
         HEADER_Accept="application/json"
         status_code=201,409,500
         return_content=yes
-        body='{ "name": "gliderlabs/registrator", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "registrator", "domain": "", "container_name": "{{ansible_hostname}}-registrator", "args" : ["consul://192.168.123.140:8500"], "labels" : [ "dockertutorial-01" ], "volumes": [ "/var/run/docker.sock:/tmp/docker.sock" ], "restart_policy": { "name": "always" } }'
-      when: "not current_container_list.content | search('registrator')"
+        body='{ "name": "gliderlabs/registrator", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "registrator", "domain": "", "container_name": "{{ansible_hostname}}-registrator", "args" : ["consul://{{dockertutorial01_ip}}:8500"], "labels" : [ "dockertutorial-01" ], "volumes": [ "/var/run/docker.sock:/tmp/docker.sock" ], "restart_policy": { "name": "always" } }'
+      #TODO: container list should only show containers for this vm
+      #when: "not current_container_list.content | search('registrator')"
 

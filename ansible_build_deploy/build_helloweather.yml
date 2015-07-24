@@ -4,11 +4,11 @@
   sudo: yes
   vars:
     dockerprivregistry: "192.168.123.140:5000"
-    docker_img_name: "basepython"
+    docker_img_name: "helloweather"
     ansiblerepo_basedir: "ansible_build_deploy"
     build_tmpdir: "tmp_packer_playbooks"
-    packer_jsonfile: "basepython_packerdef_using_ansible"
-    docker_localansibletasks: "local_install_python"
+    packer_jsonfile: "helloweather_packerdef_using_ansible"
+    docker_localansibletasks: "local_install_helloweather"
     repo_url: "https://github.com/pythianliappis/pythonhelloweather"
     repo_dir: "pythonhelloweather"
     dockerimage_appdir: "/app"

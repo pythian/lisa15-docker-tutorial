@@ -6,7 +6,7 @@ Blah blah
 
 ## Acknowledgements
 
-The packer setup is largely based on the excellent work of Jacob Adams: [https://github.com/jakobadam/packer-qemu-templates](packer-qemu-templates)
+The packer setup is largely based on the excellent work of Jacob Adams: [packer-qemu-templates](https://github.com/jakobadam/packer-qemu-templates)
 
 ## How to run packer
 

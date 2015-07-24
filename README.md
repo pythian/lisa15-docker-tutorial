@@ -29,19 +29,33 @@ read -p 'Enter password: ' -s password
 packer build -var 'user=ubuntu' -var "password=$password" ubuntu14.04-dockertutorial-01.json
 ```
 
+## Add the box to vagrant
+
+Packer will build a box that you can find under box/
+
+Add it to your vagrant environment using:
+
+```bash
+vagrant box add box/dockertutorial-01.box --name "dockertutorial"
+```
+
 ## Provision with vagrant
 
 Libvirt:
 
 Run:
 
+```bash
 vagrant up dockertutorial --provider=libvirt --no-parallel
+```
 
 Virtualbox:
 
 Run:
 
+```bash
 vagrant up dockertutorial --provider=virtualbox --no-parallel
+```
 
 ## Preconfigured IP addresses:
 

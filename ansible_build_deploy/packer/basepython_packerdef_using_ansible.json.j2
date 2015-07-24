@@ -6,6 +6,15 @@
     }],
     "provisioners":[
         {
+            "type": "shell",
+            "inline": ["mkdir {{dockerimage_appdir}}","chmod 0700 {{dockerimage_appdir}}"]
+        },
+        {
+            "type": "file",
+            "source": "{{build_tmpdir}}/{{repo_dir}}/",
+            "destination": "{{dockerimage_appdir}}"
+        },
+        {
             "type": "ansible-local",
             "playbook_file": "{{build_tmpdir}}/{{docker_localansibletasks}}{{rnd}}.yml",
             "playbook_dir": "{{build_tmpdir}}"

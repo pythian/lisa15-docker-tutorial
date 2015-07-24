@@ -9,6 +9,9 @@
     build_tmpdir: "tmp_packer_playbooks"
     packer_jsonfile: "basepython_packerdef_using_ansible"
     docker_localansibletasks: "local_install_python"
+    repo_url: "https://github.com/pythianliappis/pythonhelloweather"
+    repo_dir: "pythonhelloweather"
+    dockerimage_appdir: "/app"
   tasks:
     - set_fact:
         rnd: "{{9999999 | random}}"
@@ -26,6 +29,9 @@
 
     # - name: Copy needed roles used by packer
     #   copy: src=../roles/whatever.smth dest=wherever owner=ubuntu group=ubuntu
+
+    - name: Clone helloweather repo
+      git: repo="{{repo_url}}" dest="../{{build_tmpdir}}/{{repo_dir}}"
 
     - name: Execute packer using definition file
       shell: PATH=$PATH:/usr/local/bin && packer build "{{build_tmpdir}}/{{packer_jsonfile}}{{rnd}}.json"

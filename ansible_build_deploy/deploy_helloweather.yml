@@ -1,0 +1,36 @@
+---
+- hosts: 127.0.0.1
+  user: vagrant
+  sudo: yes
+  vars:
+    dockerprivregistry: "192.168.123.140:5000"
+    docker_privreg_uri: "{{dockertutorial01_shipyard_ip}}:5000"
+    docker_img_name: "helloweather"
+    docker_img_tag: "latest"
+    dockertutorial01_shipyard_ip: "192.168.123.140"
+    dockertutorial01_shipyard_url: "http://{{dockertutorial01_shipyard_ip}}:8080"
+    shipyard_api_key: "IvIveFbGtVqrWCjQls8cy3pyLaZ73MWVEWSe"
+    target_shipyard_engine: "dockertutorial-02"
+    requiredmemory:  98 # Use 0.0 for no limitation of no memory resources
+    requiredcpus: 0.2 # Use 0.0 for no limitation of cpu resources
+    deploy_data:
+      requiredcpus: "{{requiredcpus}}"
+      requiredmemory: "{{requiredmemory}}"
+      environment:
+        FLASK_TEST_ENVVAR: "this is how you define additional env params for the container"
+      publish: True
+      bind_ports:
+        - { proto: tcp, container_port: 5555 }
+      args: [ "/app/helloweather.py" ]
+
+  tasks:
+    - name: Deploy a helloweather container
+      uri: >
+        url={{dockertutorial01_shipyard_url}}/api/containers?pull=true
+        method=POST
+        HEADER_Content-Type="application/json"
+        HEADER_X-Service-Key={{shipyard_api_key}}
+        HEADER_Accept="application/json"
+        status_code=201,409,500
+        return_content=yes
+        body='{ "name": "{{dockerprivregistry}}/{{docker_img_name}}:{{docker_img_tag}}", "cpus": {{'%.1f'|format(deploy_data.requiredcpus|float)}}, "memory": {{'%.1f'|format(deploy_data.requiredmemory|float)}}, "type": "service", "hostname": "{{docker_img_name}}", "container_name": "", "domain": "", "labels": [ "{{target_shipyard_engine}}" ], "bind_ports": {{deploy_data.bind_ports|to_json}}, "environment": {{deploy_data.environment|to_json}}, "restart_policy": { "name": "always" }, "args": {{deploy_data.args|to_json}} }'

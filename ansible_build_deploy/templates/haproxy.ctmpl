@@ -1,0 +1,38 @@
+global
+    daemon
+    user haproxy
+    group haproxy
+    chroot /var/lib/haproxy
+    log /dev/log local0
+
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+
+    # Default SSL material locations
+    ca-base /etc/ssl/certs
+    crt-base /etc/ssl/private
+
+    # Default ciphers to use on SSL-enabled listening sockets.
+    # For more information, see ciphers(1SSL). This list is from:
+    #  https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
+    ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS
+    ssl-default-bind-options no-sslv3
+
+defaults
+    mode http
+    timeout connect 5000ms	
+    timeout client 50000ms
+    timeout server 50000ms
+    log global
+    option dontlognull
+    option log-health-checks
+
+frontend {{backend01_servicename}}-httpin
+    bind *:10000
+    default_backend {{backend01_servicename}}containers
+
+backend {{backend01_servicename}}containers
+    balance roundrobin
+    option httpclose
+    option httpchk HEAD / HTTP/1.1\r\nHost:localhost{{'{{'}}range service "{{backend01_servicename}}"{{'}}'}}
+    {% raw %}server {{.Node}} {{.Address}}:{{.Port}}{{end}}{% endraw %}

@@ -1,0 +1,26 @@
+---
+- hosts: 127.0.0.1
+  user: vagrant
+  sudo: yes
+  vars:
+    dockertutorial01_ip: "192.168.123.140"
+    consul_template_confdir: "/etc/consul-template"
+    consul_template_conffile: "consultemplate.cfg"
+    haproxy_template_file: "haproxy.ctmpl"
+    supervisor_conffile: "supervisord-consultemplate.conf"
+    backend01_servicename: "helloweather"
+  tasks:
+    - name: Deploy main consul-template configuration file
+      template: src="templates/{{consul_template_conffile}}" dest="{{consul_template_confdir}}/{{consul_template_conffile}}" owner=root group=root mode=0700
+      register: consultemplateconfig
+
+    - name: Deploy haproxy consul-template template
+      template: src="templates/{{haproxy_template_file}}" dest="{{consul_template_confdir}}/{{haproxy_template_file}}" owner=root group=root mode=0700
+      register: consultemplatetmpl
+
+    - name: Create supervisord configuration
+      template: src="templates/{{supervisor_conffile}}" dest="/etc/supervisor/conf.d" owner=root group=root mode=0700
+      register: supervisorconf
+
+    - service: name=supervisor state=restarted
+      when: supervisorconf|changed or consultemplateconfig|changed or consultemplatetmpl|changed

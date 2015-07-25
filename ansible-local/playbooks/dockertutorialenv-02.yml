@@ -43,7 +43,7 @@
         HEADER_Accept="application/json"
         status_code=201
         return_content=yes
-        body='{ "ca_cert": "", "engine": { "addr": "http://{{dockertutorial02_ip}}:4243", "cpus": {{"%.1f"|format(ansible_processor_count|float)}}, "id": "{{enginename}}", "labels": [ "{{enginename}}" ], "memory": {{ansible_memfree_mb}} }, "id": "{{enginename}}", "ssl_cert": "", "ssl_key": "" }'
+        body='{ "ca_cert": "", "engine": { "addr": "http://{{dockertutorial02_ip}}:4243", "cpus": {{"%.1f"|format(ansible_processor_vcpus|float)}}, "id": "{{enginename}}", "labels": [ "{{enginename}}" ], "memory": {{ansible_memfree_mb}} }, "id": "{{enginename}}", "ssl_cert": "", "ssl_key": "" }'
       register: added_engine_to_shipyard
       when: "not current_engine_list.content | search('{{enginename}}')"
 

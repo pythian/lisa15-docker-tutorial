@@ -62,17 +62,19 @@ vagrant up dockertutorial --provider=virtualbox --no-parallel
 $ vagrant ssh dockertutorial-01
 vagrant@dockertutorial-01:~$ cd /vagrant/
 vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/run_haproxy_via_consultemplate.yml 
-```bash
+```
 
 ## Build the helloweather docker image:
 
 ```bash
 vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/build_helloweather.yml 
-```bash
+```
 
 ## Run the helloweather application:
 
+```bash
 vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/build_helloweather.yml 
+```
 
 This will deploy the helloweather app, by default, on the second vm, dockertutorial-02
 
@@ -88,8 +90,7 @@ You may explicitly specify the vm you wish your container to land on by overridi
 
 ```bash
 vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/deploy_helloweather.yml -e "target_shipyard_engine=dockertutorial-03"
-```bash
-
+```
 
 ## Preconfigured IP addresses:
 

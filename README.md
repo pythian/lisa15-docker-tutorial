@@ -56,6 +56,40 @@ Run:
 ```bash
 vagrant up dockertutorial --provider=virtualbox --no-parallel
 ```
+## ssh into dockertutorial-01 and start haproxy
+
+```bash
+$ vagrant ssh dockertutorial-01
+vagrant@dockertutorial-01:~$ cd /vagrant/
+vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/run_haproxy_via_consultemplate.yml 
+```bash
+
+## Build the helloweather docker image:
+
+```bash
+vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/build_helloweather.yml 
+```bash
+
+## Run the helloweather application:
+
+vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/build_helloweather.yml 
+
+This will deploy the helloweather app, by default, on the second vm, dockertutorial-02
+
+## Visit the app via haproxy
+
+Visit: <http://192.168.123.140:10000>
+
+All helloweather containers automatically get configured as haproxy backends via consul-template.
+
+## Optional: run more helloweather app containers in different vms
+
+You may explicitly specify the vm you wish your container to land on by overriding the variable target_shipyard_engine . For example to get the helloweather app running on the third vm you'd run:
+
+```bash
+vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/deploy_helloweather.yml -e "target_shipyard_engine=dockertutorial-03"
+```bash
+
 
 ## Preconfigured IP addresses:
 

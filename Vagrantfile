@@ -45,6 +45,13 @@ Vagrant.configure("2") do |config|
       v.memory = 1024
       v.cpus = 2
     end
+    i.vm.provider :vmware do |v, override|
+      override.vm.synced_folder '.', '/vagrant', disabled: true
+      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'nfs'
+      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'nfs', create: true
+      v.vmx["memsize"] = 1024
+      v.vmx["numvcpus"] = 2
+    end
     i.vm.network :private_network, ip: "192.168.123.140"
 
     i.vm.provision "shell",
@@ -75,6 +82,13 @@ Vagrant.configure("2") do |config|
       v.memory = 512
       v.cpus = 1
     end
+    i.vm.provider :vmware do |v, override|
+      override.vm.synced_folder '.', '/vagrant', disabled: true
+      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'nfs'
+      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'nfs', create: true
+      v.vmx["memsize"] = 512
+      v.vmx["numvcpus"] = 1
+    end
     i.vm.network :private_network, ip: "192.168.123.141"
 
     i.vm.provision "shell",
@@ -103,6 +117,13 @@ Vagrant.configure("2") do |config|
       override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', create: true
       v.memory = 512
       v.cpus = 1
+    end
+    i.vm.provider :vmware do |v, override|
+      override.vm.synced_folder '.', '/vagrant', disabled: true
+      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'nfs'
+      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'nfs', create: true
+      v.vmx["memsize"] = 512
+      v.vmx["numvcpus"] = 1
     end
     i.vm.network :private_network, ip: "192.168.123.142"
 

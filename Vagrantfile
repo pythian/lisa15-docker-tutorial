@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
       v.memory = 1024
       v.cpus = 2
     end
-    i.vm.provider :vmware do |v, override|
+    i.vm.provider :vmware_fusion do |v, override|
       override.vm.synced_folder '.', '/vagrant', disabled: true
       override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'nfs'
       override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'nfs', create: true
@@ -82,7 +82,7 @@ Vagrant.configure("2") do |config|
       v.memory = 512
       v.cpus = 1
     end
-    i.vm.provider :vmware do |v, override|
+    i.vm.provider :vmware_fusion do |v, override|
       override.vm.synced_folder '.', '/vagrant', disabled: true
       override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'nfs'
       override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'nfs', create: true
@@ -118,7 +118,7 @@ Vagrant.configure("2") do |config|
       v.memory = 512
       v.cpus = 1
     end
-    i.vm.provider :vmware do |v, override|
+    i.vm.provider :vmware_fusion do |v, override|
       override.vm.synced_folder '.', '/vagrant', disabled: true
       override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'nfs'
       override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'nfs', create: true

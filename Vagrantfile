@@ -20,92 +20,62 @@ $shared_folders = {}
 $forwarded_ports = {}
 
 Vagrant.configure('2') do |config|
-  config.vm.define 'dockertutorial-01', autostart: true do |i|
-    i.vm.box = 'dockertutorial'
-    # i.vm.network :public_network, :dev => "em1", :mode => "bridge"
-    i.vm.hostname = 'dockertutorial-01'
-    i.vm.provider :libvirt do |domain, override|
-      # Remember to run with --provider=libvirt otherwise Vagrant will execute also the virtualbox section!
-      override.vm.synced_folder '.', '/vagrant', disabled: true
-      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'rsync'
-      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'rsync', create: true
-      domain.driver = 'kvm'
-      # domain.host = "atreas.lan"
-      domain.storage_pool_name = 'default'
-      domain.memory = 1024
-      domain.cpus = 2
-      domain.management_network_name = 'vagrant'
-      domain.management_network_address = '192.168.123.0/24'
-    end
-    i.vm.provider :virtualbox do |v, override|
-      # Use virtualbox synced folders, should work in all operating systems
-      override.vm.synced_folder '.', '/vagrant', disabled: true
-      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible'
-      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', create: true
-      v.memory = 1024
-      v.cpus = 2
-    end
-    i.vm.network :private_network, ip: '192.168.123.140'
+  config.vm.provider :libvirt do |libvirt|
+    # Remember to run with --provider=libvirt otherwise Vagrant will execute also the virtualbox section!
+    libvirt.vm.synced_folder '.', '/vagrant', disabled: true
+    libvirt.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible', type: 'rsync'
+    libvirt.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', type: 'rsync', create: true
 
-    i.vm.provision 'shell',
-      inline: 'ansible-playbook /tmp/vagrantupansible/playbooks/dockertutorialenv-01.yml'
+    libvirt.driver = 'kvm'
+    libvirt.storage_pool_name = 'default'
+    libvirt.management_network_name = 'vagrant'
+    libvirt.management_network_address = '192.168.123.0/24'
   end
 
-  config.vm.define 'dockertutorial-02', autostart: true do |i|
-    i.vm.box = 'dockertutorial'
-    i.vm.hostname = 'dockertutorial-02'
-    i.vm.provider :libvirt do |domain, override|
-      # Remember to run with --provider=libvirt otherwise Vagrant will execute also the virtualbox section!
-      override.vm.synced_folder '.', '/vagrant', disabled: true
-      override.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible', type: 'rsync'
-      override.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', type: 'rsync', create: true
-      domain.driver = 'kvm'
-      domain.storage_pool_name = 'default'
-      domain.memory = 512
-      domain.cpus = 1
-      domain.management_network_name = 'vagrant'
-      domain.management_network_address = '192.168.123.0/24'
-    end
-    i.vm.provider :virtualbox do |v, override|
-      # Use virtualbox synced folders, should work in all operating systems
-      override.vm.synced_folder '.', '/vagrant', disabled: true
-      override.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible'
-      override.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', create: true
-      v.memory = 512
-      v.cpus = 1
-    end
-    i.vm.network :private_network, ip: '192.168.123.141'
-
-    i.vm.provision 'shell',
-      inline: 'ansible-playbook /tmp/vagrantupansible/playbooks/dockertutorialenv-02.yml'
+  config.vm.provider :virtualbox do |virtualbox|
+    # Use virtualbox synced folders, should work in all operating systems
+    virtualbox.vm.synced_folder '.', '/vagrant', disabled: true
+    virtualbox.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible'
+    virtualbox.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', create: true
   end
 
-  config.vm.define 'dockertutorial-03', autostart: true do |i|
-    i.vm.box = 'dockertutorial'
-    i.vm.hostname = 'dockertutorial-03'
-    i.vm.provider :libvirt do |domain, override|
-      # Remember to run with --provider=libvirt otherwise Vagrant will execute also the virtualbox section!
-      override.vm.synced_folder '.', '/vagrant', disabled: true
-      override.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible', type: 'rsync'
-      override.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', type: 'rsync', create: true
-      domain.driver = 'kvm'
-      domain.storage_pool_name = 'default'
-      domain.memory = 512
-      domain.cpus = 1
-      domain.management_network_name = 'vagrant'
-      domain.management_network_address = '192.168.123.0/24'
-    end
-    i.vm.provider :virtualbox do |v, override|
-      # Use virtualbox synced folders, should work in all operating systems
-      override.vm.synced_folder '.', '/vagrant', disabled: true
-      override.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible'
-      override.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', create: true
-      v.memory = 512
-      v.cpus = 1
-    end
-    i.vm.network :private_network, ip: '192.168.123.142'
+  hosts = {
+    'dockertutorial-01' => {
+      'address' => '192.168.123.140',
+      'memory' => 1024,
+      'cpus' => 2
+    },
+    'dockertutorial-02' => {
+      'address' => '192.168.123.141',
+      'memory' => 512,
+      'cpus' => 1
+    },
+    'dockertutorial-03' => {
+      'address' => '192.168.123.142',
+      'memory' => 512,
+      'cpus' => 1
+    }
+  }
 
-    i.vm.provision 'shell',
-      inline: 'ansible-playbook /tmp/vagrantupansible/playbooks/dockertutorialenv-03.yml'
+  hosts.each do |host, params|
+    config.vm.define host, autostart: true do |host_config|
+      host_config.vm.box = 'dockertutorial'
+      host_config.vm.hostname = "#{host}"
+      host_config.vm.network :private_network, ip: params['address']
+
+      host_config.vm.provider :libvirt do |libvirt|
+        libvirt.memory = params['memory']
+        libvirt.cpus = params['cpus']
+      end
+
+      host_config.vm.provider :virtualbox do |virtualbox|
+        virtualbox.memory = params['memory']
+        virtualbox.cpus = params['cpus']
+      end
+
+      host_config.vm.provision :shell do |s|
+        s.inline = "ansible-playbook /tmp/vagrantupansible/playbooks/#{host}.yml"
+      end
+    end
   end
 end

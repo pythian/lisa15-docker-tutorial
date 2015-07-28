@@ -47,8 +47,8 @@ Vagrant.configure("2") do |config|
     end
     i.vm.provider :vmware_fusion do |v, override|
       override.vm.synced_folder '.', '/vagrant', disabled: true
-      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'nfs'
-      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'nfs', create: true
+      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'rsync'
+      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'rsync', create: true
       v.vmx["memsize"] = 1024
       v.vmx["numvcpus"] = 2
     end
@@ -84,8 +84,8 @@ Vagrant.configure("2") do |config|
     end
     i.vm.provider :vmware_fusion do |v, override|
       override.vm.synced_folder '.', '/vagrant', disabled: true
-      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'nfs'
-      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'nfs', create: true
+      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'rsync'
+      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'rsync', create: true
       v.vmx["memsize"] = 512
       v.vmx["numvcpus"] = 1
     end
@@ -120,8 +120,8 @@ Vagrant.configure("2") do |config|
     end
     i.vm.provider :vmware_fusion do |v, override|
       override.vm.synced_folder '.', '/vagrant', disabled: true
-      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'nfs'
-      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'nfs', create: true
+      override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'rsync'
+      override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'rsync', create: true
       v.vmx["memsize"] = 512
       v.vmx["numvcpus"] = 1
     end

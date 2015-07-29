@@ -23,18 +23,18 @@ Vagrant.configure('2') do |config|
   hosts = {
     'dockertutorial-01' => {
       'address' => '192.168.123.140',
-      'memory' => 1024,
-      'cpus' => 2
+      'memory'  => 1024,
+      'cpus'    => 2
     },
     'dockertutorial-02' => {
       'address' => '192.168.123.141',
-      'memory' => 512,
-      'cpus' => 1
+      'memory'  => 512,
+      'cpus'    => 1
     },
     'dockertutorial-03' => {
       'address' => '192.168.123.142',
-      'memory' => 512,
-      'cpus' => 1
+      'memory'  => 512,
+      'cpus'    => 1
     }
   }
 

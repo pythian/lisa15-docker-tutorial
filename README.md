@@ -73,7 +73,7 @@ vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/build_
 ## Run the helloweather application:
 
 ```bash
-vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/build_helloweather.yml 
+vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/deploy_helloweather.yml 
 ```
 
 This will deploy the helloweather app, by default, on the second vm, dockertutorial-02

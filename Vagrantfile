@@ -20,25 +20,6 @@ $shared_folders = {}
 $forwarded_ports = {}
 
 Vagrant.configure('2') do |config|
-  config.vm.provider :libvirt do |libvirt|
-    # Remember to run with --provider=libvirt otherwise Vagrant will execute also the virtualbox section!
-    libvirt.vm.synced_folder '.', '/vagrant', disabled: true
-    libvirt.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible', type: 'rsync'
-    libvirt.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', type: 'rsync', create: true
-
-    libvirt.driver = 'kvm'
-    libvirt.storage_pool_name = 'default'
-    libvirt.management_network_name = 'vagrant'
-    libvirt.management_network_address = '192.168.123.0/24'
-  end
-
-  config.vm.provider :virtualbox do |virtualbox|
-    # Use virtualbox synced folders, should work in all operating systems
-    virtualbox.vm.synced_folder '.', '/vagrant', disabled: true
-    virtualbox.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible'
-    virtualbox.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', create: true
-  end
-
   hosts = {
     'dockertutorial-01' => {
       'address' => '192.168.123.140',
@@ -64,11 +45,25 @@ Vagrant.configure('2') do |config|
       host_config.vm.network :private_network, ip: params['address']
 
       host_config.vm.provider :libvirt do |libvirt|
+        # Remember to run with --provider=libvirt otherwise Vagrant will execute also the virtualbox section!
+        libvirt.vm.synced_folder '.', '/vagrant', disabled: true
+        libvirt.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible', type: 'rsync'
+        libvirt.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', type: 'rsync', create: true
+
+        libvirt.driver = 'kvm'
+        libvirt.storage_pool_name = 'default'
+        libvirt.management_network_name = 'vagrant'
+        libvirt.management_network_address = '192.168.123.0/24'
         libvirt.memory = params['memory']
         libvirt.cpus = params['cpus']
       end
 
       host_config.vm.provider :virtualbox do |virtualbox|
+        # Use virtualbox synced folders, should work in all operating systems
+        virtualbox.vm.synced_folder '.', '/vagrant', disabled: true
+        virtualbox.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible'
+        virtualbox.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', create: true
+
         virtualbox.memory = params['memory']
         virtualbox.cpus = params['cpus']
       end

@@ -44,11 +44,11 @@ Vagrant.configure('2') do |config|
       host_config.vm.hostname = "#{host}"
       host_config.vm.network :private_network, ip: params['address']
 
-      host_config.vm.provider :libvirt do |libvirt|
+      host_config.vm.provider :libvirt do |libvirt, override|
         # Remember to run with --provider=libvirt otherwise Vagrant will execute also the virtualbox section!
-        libvirt.vm.synced_folder '.', '/vagrant', disabled: true
-        libvirt.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible', type: 'rsync'
-        libvirt.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', type: 'rsync', create: true
+        override.vm.synced_folder '.', '/vagrant', disabled: true
+        override.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible', type: 'rsync'
+        override.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', type: 'rsync', create: true
 
         libvirt.driver = 'kvm'
         libvirt.storage_pool_name = 'default'
@@ -58,11 +58,11 @@ Vagrant.configure('2') do |config|
         libvirt.cpus = params['cpus']
       end
 
-      host_config.vm.provider :virtualbox do |virtualbox|
+      host_config.vm.provider :virtualbox do |virtualbox, override|
         # Use virtualbox synced folders, should work in all operating systems
-        virtualbox.vm.synced_folder '.', '/vagrant', disabled: true
-        virtualbox.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible'
-        virtualbox.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', create: true
+        override.vm.synced_folder '.', '/vagrant', disabled: true
+        override.vm.synced_folder './ansible-local/', '/tmp/vagrantupansible'
+        override.vm.synced_folder './ansible_build_deploy/', '/vagrant/ansible_build_deploy/', create: true
 
         virtualbox.memory = params['memory']
         virtualbox.cpus = params['cpus']

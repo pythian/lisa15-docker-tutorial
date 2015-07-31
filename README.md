@@ -22,6 +22,12 @@ Virtualbox:
 packer build vbox-ubuntu14.04-dockertutorial-01.json
 ```
 
+VMWare Fusion (Mac OSX):
+
+```bash
+packer build vmware-ubuntu14.04-dockertutorial-01.json
+```
+
 As an option if you want to create a new user e.g. ubuntu use:
 
 ```bash
@@ -43,10 +49,12 @@ vagrant box add box/dockertutorial-01.box --name "dockertutorial"
 
 Libvirt:
 
+Ensure you have the libvirt vagrant plugin installed (vagrant install vagrant-libvirt)
+
 Run:
 
 ```bash
-vagrant up dockertutorial --provider=libvirt --no-parallel
+vagrant up --provider=libvirt --no-parallel
 ```
 
 Virtualbox:
@@ -54,8 +62,19 @@ Virtualbox:
 Run:
 
 ```bash
-vagrant up dockertutorial --provider=virtualbox --no-parallel
+vagrant up --provider=virtualbox --no-parallel
 ```
+
+VMWare Fusion:
+
+Ensure you have purchased and installed the vmware fusion vagrant plugin installed.
+Run:
+
+```bash
+export VAGRANT_DEFAULT_PROVIDER=vmware_fusion
+vagrant up --no-parallel
+```
+
 ## ssh into dockertutorial-01 and start haproxy
 
 ```bash

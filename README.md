@@ -75,14 +75,6 @@ export VAGRANT_DEFAULT_PROVIDER=vmware_fusion
 vagrant up --no-parallel
 ```
 
-## ssh into dockertutorial-01 and start haproxy
-
-```bash
-$ vagrant ssh dockertutorial-01
-vagrant@dockertutorial-01:~$ cd /vagrant/
-vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/run_haproxy_via_consultemplate.yml 
-```
-
 ## Build the helloweather docker image:
 
 ```bash
@@ -102,6 +94,7 @@ This will deploy the helloweather app, by default, on the second vm, dockertutor
 Visit: <http://192.168.123.140:10000>
 
 All helloweather containers automatically get configured as haproxy backends via consul-template.
+haproxy configuration can be found under `/etc/haproxy/haproxy.cfg`
 
 ## Optional: run more helloweather app containers in different vms
 

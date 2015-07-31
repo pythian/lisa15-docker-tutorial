@@ -5,20 +5,6 @@ require 'fileutils'
 
 Vagrant.require_version '>= 1.6.0'
 
-# Defaults for config options defined in CONFIG
-$boxnames = { :libvirt => 'baremettle/ubuntu-14.04' }
-$num_instances = 1
-$instance_name_prefix = 'core'
-$update_channel = 'alpha'
-$image_version = 'current'
-$enable_serial_logging = false
-$share_home = false
-$vm_gui = false
-$vm_memory = 1024
-$vm_cpus = 1
-$shared_folders = {}
-$forwarded_ports = {}
-
 Vagrant.configure('2') do |config|
   hosts = {
     'dockertutorial-01' => {
@@ -37,6 +23,9 @@ Vagrant.configure('2') do |config|
       'cpus'    => 1
     }
   }
+
+  # Resolve stdin: is not a tty in ubuntu over vagrant
+  config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
   hosts.each do |host, params|
     config.vm.define host, autostart: true do |host_config|
@@ -76,9 +65,8 @@ Vagrant.configure('2') do |config|
         vmwarefusion.vmx["numvcpus"] = params['cpus']
         end
       
-      host_config.vm.provision :shell do |s|
-        s.inline = "ansible-playbook /tmp/vagrantupansible/playbooks/#{host}.yml"
-      end
+      host_config.vm.provision :shell, inline: "ansible-playbook /tmp/vagrantupansible/playbooks/#{host}.yml"
+      host_config.vm.provision :shell, inline: "ansible-playbook /vagrant/ansible_build_deploy/run_haproxy_via_consultemplate.yml"
     end
   end
 end

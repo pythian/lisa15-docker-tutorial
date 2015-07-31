@@ -33,4 +33,4 @@
         HEADER_Accept="application/json"
         status_code=201,409,500
         return_content=yes
-        body='{ "name": "{{dockerprivregistry}}/{{docker_img_name}}:{{docker_img_tag}}", "cpus": {{'%.1f'|format(deploy_data.requiredcpus|float)}}, "memory": {{'%.1f'|format(deploy_data.requiredmemory|float)}}, "type": "service", "hostname": "{{docker_img_name}}", "container_name": "", "domain": "", "labels": [ "{{target_shipyard_engine}}" ], "bind_ports": {{deploy_data.bind_ports|to_json}}, "environment": {{deploy_data.environment|to_json}}, "restart_policy": { "name": "always" }, "args": {{deploy_data.args|to_json}} }'
+        body='{ "name": "{{dockerprivregistry}}/{{docker_img_name}}:{{docker_img_tag}}", "cpus": {{'%.1f'|format(deploy_data.requiredcpus|float)}}, "memory": {{'%.1f'|format(deploy_data.requiredmemory|float)}}, "type": "service", "hostname": "{{target_shipyard_engine}}", "container_name": "", "domain": "", "labels": [ "{{target_shipyard_engine}}" ], "bind_ports": {{deploy_data.bind_ports|to_json}}, "environment": {{deploy_data.environment|to_json}}, "restart_policy": { "name": "always" }, "args": {{deploy_data.args|to_json}} }'

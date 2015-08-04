@@ -4,6 +4,18 @@
 
 Blah blah
 
+## Requirements
+
+Host Machine:
+
+* OS: Windows or Linux or Mac OSX
+* Software required:
+  
+  * virtualbox (all OS's) or kvm+libvirt (linux only) or vmware-fusion (OSX)
+  * vagrant >1.6.2. If you are using libvirt you need to [https://github.com/pradels/vagrant-libvirt#installation](install the vagrant-libvirt plugin)
+  * Network bandwith: If you choose to build the packer box yourself expect the whole process to download approx 2.5GB of data
+  * Disk space: for Libvirt you will need approx 6GB under ~/.vagrant.d/boxes **and** the same under /var/lib/libvirt/images (this is due to vagrant-libvirt and how images are stored in libvirt). For the other hypervisors, you will need half of this space.
+  
 ## Acknowledgements
 
 The packer setup is largely based on the excellent work of Jacob Adams: [packer-qemu-templates](https://github.com/jakobadam/packer-qemu-templates)
@@ -12,8 +24,13 @@ The packer setup is largely based on the excellent work of Jacob Adams: [packer-
 
 Libvirt:
 
+**IMPORTANT: Libvirt by default uses /tmp during image build operations. If your /tmp is <6GB please provide a directory with sufficient space in the TMPDIR var**
+
 ```bash
 packer build ubuntu14.04-dockertutorial-01.json
+
+export TMPDIR=<someplacewithspace>; packer build ubuntu14.04-dockertutorial-01.json
+
 ```
 
 Virtualbox:
@@ -55,6 +72,9 @@ Run:
 
 ```bash
 vagrant up --provider=libvirt --no-parallel
+
+# or to override the default TMPDIR
+
 ```
 
 Virtualbox:

@@ -12,7 +12,8 @@ Host Machine:
 * Software required:
   
   * virtualbox (all OS's) or kvm+libvirt (linux only) or vmware-fusion (OSX)
-  * vagrant >1.6.2. If you are using libvirt you need to [https://github.com/pradels/vagrant-libvirt#installation](install the vagrant-libvirt plugin)
+  * vagrant >1.6.2. If you are using libvirt you need to [install the vagrant-libvirt plugin](https://github.com/pradels/vagrant-libvirt#installation)
+  * packer: [Download the appropriate packer for your distribution](https://www.packer.io/downloads.html)
   * Network bandwith: If you choose to build the packer box yourself expect the whole process to download approx 2.5GB of data
   * Disk space: for Libvirt you will need approx 6GB under ~/.vagrant.d/boxes **and** the same under /var/lib/libvirt/images (this is due to vagrant-libvirt and how images are stored in libvirt). For the other hypervisors, you will need half of this space.
   
@@ -29,6 +30,7 @@ Libvirt:
 ```bash
 packer build ubuntu14.04-dockertutorial-01.json
 
+# or to define the TMPDIR
 export TMPDIR=<someplacewithspace>; packer build ubuntu14.04-dockertutorial-01.json
 
 ```

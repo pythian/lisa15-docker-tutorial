@@ -103,7 +103,7 @@ ssh to dockertutorial-01:
 
 ```bash
 vagrant ssh dockertutorial-01
-```bash
+```
 
 move to /vagrant: `cd /vagrant`
 

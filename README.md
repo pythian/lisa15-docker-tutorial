@@ -106,6 +106,7 @@ vagrant ssh dockertutorial-01
 ```
 
 move to /vagrant: `cd /vagrant`
+and then build the helloweather docker image using:
 
 ```bash
 vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/build_helloweather.yml 

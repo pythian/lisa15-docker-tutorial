@@ -99,6 +99,14 @@ vagrant up --no-parallel
 
 ## Build the helloweather docker image:
 
+ssh to dockertutorial-01:
+
+```bash
+vagrant ssh dockertutorial-01
+```bash
+
+move to /vagrant: `cd /vagrant`
+
 ```bash
 vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/build_helloweather.yml 
 ```

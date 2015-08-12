@@ -54,15 +54,22 @@
       register: dockerpsnames_output
       when: "'/usr/bin/docker -d' in ps_output.stdout"
 
-    # TODO Replace this wait with a python program that polls rethinkdb until the table service_keys is ready
-    - name: Wait until rethinkdb is up and running (and tables have been created)
-      wait_for: timeout=15
-      #wait_for: host=0.0.0.0 port=32768 state=drained
+    - name: Wait until rethinkdb is up and running. That includes two containers.
+      shell: 'docker ps -f name="rethinkdb" -f status=running -q | wc -l'
+      register: dockerpsshipyard
+      until: dockerpsshipyard.stdout.find("2") != -1
+      retries: 20
+      delay: 5
+
+    - name: Wait until rethinkdb is listening
+      wait_for: host=0.0.0.0 port=32769 state=started
+
+    - name: Wait until rethinkdb is listening
+      wait_for: host=172.17.0.2 port=28015 state=started
 
     - name: "Start Shipyard controller"
       command: "docker run -i -t -p 8080:8080 -d --name shipyard --link shipyard-rethinkdb:rethinkdb shipyard/shipyard -disable-usage-info"
       when: "'/usr/bin/docker -d' in ps_output.stdout and ('shipyard-rethinkdb-data' in dockerpsnames_output.stdout) and (dockerpsnames_output.stdout | search('shipyard-rethinkdb[\n|$]')) and not (dockerpsnames_output.stdout | search('shipyard[\n|$]'))"
-
 
     # Install private registry
 
@@ -83,14 +90,25 @@
     - name: Copy script that inserts new API key to shipyard
       template: src=templates/createapikey.j2 dest=/home/vagrant/createapikey.py owner=vagrant group-vagrant mode=0700
 
-    - name: Wait 15 sec before creating api key in shipyard
-      wait_for: timeout=15
-      
+    - name: Wait until shipyard container is up before attempting to create an api key in its database
+      shell: 'docker ps -f name="shipyard$" -f status=running -q | wc -l'
+      register: dockerpsshipyard
+      until: dockerpsshipyard.stdout.find("1") != -1
+      retries: 20
+      delay: 5
+
     - name: Execute script
       shell: /home/vagrant/createapikey.py chdir="/home/vagrant" executable="/bin/bash"
       register: createnewapikey
       ignore_errors: true
-      
+
+    - name: Wait until shipyard api available
+      shell: 'curl -i "{{dockertutorial01_shipyard_url}}/api/engines" -H "X-Service-Key: {{shipyard_api_key}}"'
+      register: shipyardapicallresult
+      until: shipyardapicallresult.stdout.find("200 OK") != -1
+      retries: 20
+      delay: 5
+
     - name: Check if this instance is registered as engine in shipyard
       uri: >
         url={{dockertutorial01_shipyard_url}}/api/engines
@@ -101,9 +119,6 @@
         status_code=200
         return_content=yes
       register: current_engine_list
-
-    - name: Wait till shipyard api is listening
-      wait_for: host=0.0.0.0 port=8080 state=drained
 
     - name: Add vm to shipyard engine list if missing
       uri: >
@@ -145,7 +160,7 @@
       when: "not current_container_list.content | search('dockerprivateregistry')"
 
     - name: Wait till registry is listening
-      wait_for: host=0.0.0.0 port=5000 state=drained
+      wait_for: host=0.0.0.0 port=5000 state=started
 
     - name: Start consul node1
       uri: >
@@ -160,7 +175,7 @@
       when: "not current_container_list.content | search('consulserver-01')"
 
     - name: Wait for consul agent server1 to start listening
-      wait_for: host=0.0.0.0 port=8300 state=drained
+      wait_for: host="{{dockertutorial01_shipyard_ip}}" port=8300 state=started
 
     - name: Start gliderlabs/registrator
       uri: >

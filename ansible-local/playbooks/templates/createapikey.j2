@@ -4,13 +4,20 @@ import string
 import random
 import rethinkdb as r
 import sys
+import time
 
 def id_generator(size=36, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 r.connect('localhost',32769).repl()
 
-cursor=r.db('shipyard').table('service_keys').run()
+while True:
+    try:
+        cursor=r.db('shipyard').table('service_keys').run()
+    except r.errors.RqlRuntimeError:
+        time.sleep(5)
+        continue
+    break
 
 if len(cursor.items) == 0:
     newid = uuid.uuid1()

@@ -66,7 +66,10 @@ Vagrant.configure('2') do |config|
         end
       
       host_config.vm.provision :shell, inline: "ansible-playbook /tmp/vagrantupansible/playbooks/#{host}.yml"
-      host_config.vm.provision :shell, inline: "ansible-playbook /vagrant/ansible_build_deploy/run_haproxy_via_consultemplate.yml"
+
+      if (/dockertutorial-01/ =~ host) != nil
+        host_config.vm.provision :shell, inline: "ansible-playbook /vagrant/ansible_build_deploy/run_haproxy_via_consultemplate.yml"
+      end
     end
   end
 end

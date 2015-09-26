@@ -4,18 +4,18 @@
 
 1. [Overview](#overview)
 2. [Setting up the Tutorial Environment](#setting-up-the-tutorial-environment)
-    * [Requirements](#requirements)
-    * [Building the Vagrant Box](#building-the-vagrant-box)
-      * [Providers](#providers)
-      * [Adding a User](#adding-a-user)
-    * [Adding the Box to Vagrant](#adding-the-box-to-vagrant)
-    * [Provision the Virtual Machines With Vagrant](#provision-the-virtual-machines-with-vagrant)
+  * [Requirements](#requirements)
+  * [Building the Vagrant Box](#building-the-vagrant-box)
+    * [Providers](#providers)
+    * [Adding a User](#adding-a-user)
+  * [Adding the Box to Vagrant](#adding-the-box-to-vagrant)
+  * [Provision the Virtual Machines With Vagrant](#provision-the-virtual-machines-with-vagrant)
 3. [Performing Tutorial Tasks](#performing-tutorial-tasks)
-    * [Build the ```helloweather``` Docker Image](#build-the-helloweather-docker-image)
-    * [Launch an Instance of the Container](#launch-an-instance-of-the-container)
-    * [Access the Application](#access-the-application)
-    * [Review the HAProxy Configuration](#review-the-haproxy-configuration)
-    * [Launch an Additional Container](#launch-an-additional-container)
+  * [Build the ```helloweather``` Docker Image](#build-the-helloweather-docker-image)
+  * [Launch an Instance of the Container](#launch-an-instance-of-the-container)
+  * [Access the Application](#access-the-application)
+  * [Review the HAProxy Configuration](#review-the-haproxy-configuration)
+  * [Launch an Additional Container](#launch-an-additional-container)
 4. [Preconfigured IP Addresses](#preconfigured-ip-addresses)
 5. [Software Installed](#software-installed)
 6. [VM Specific Software](#vm-specific-software)
@@ -29,16 +29,15 @@ Blah blah
 
 ### Requirements
 
-Host Machine:
-
-* OS: Windows or Linux or Mac OSX
-* Software required:
-
-  * virtualbox (all OS's) or kvm+libvirt (linux only) or vmware-fusion (OSX)
-  * vagrant >1.6.2. If you are using libvirt you need to [install the vagrant-libvirt plugin](https://github.com/pradels/vagrant-libvirt#installation)
-  * packer: [Download the appropriate packer for your distribution](https://www.packer.io/downloads.html)
-  * Network bandwith: If you choose to build the packer box yourself expect the whole process to download approx 2.5GB of data
-  * Disk space: for Libvirt you will need approx 6GB under ~/.vagrant.d/boxes **and** the same under /var/lib/libvirt/images (this is due to vagrant-libvirt and how images are stored in libvirt). For the other hypervisors, you will need half of this space.
+1. Operating system: Linux, Mac OS X, Windows
+2. [Vagrant](https://www.vagrantup.com/downloads.html): version >1.6.2
+3. [Packer](https://www.packer.io/downloads.html): if you wish to build the Vagrant box yourself
+4. Vagrant and Packer compatible virtualization tool. Choices include:
+  * [VirtualBox](https://www.virtualbox.org/wiki/Downloads): works on each of the listed operating systems
+  * [KVM](http://www.linux-kvm.org/page/Main_Page) + [libvirt](http://libvirt.org/): for Linux systems. Check installation instructions for your distribution. You will also need the [vagrant-libvirt](https://github.com/pradels/vagrant-libvirt#installation) plugin
+  * [VMware Fusion](https://www.vagrantup.com/vmware): for Mac systems, also requires the Vagrant [VMware](https://www.vagrantup.com/vmware) plugin. Both of these must be purchased
+4. Network bandwidth: If you do decide to build the box yourself, you can expect to have to download approximately 2.5GB of data
+5. Disk space: for Libvirt you will need approx 6GB under ```~/.vagrant.d/boxes``` **and** the same under ```/var/lib/libvirt/images``` (this is due to vagrant-libvirt and how images are stored in libvirt). For the other hypervisors, you will need half of this space.
 
 ### Building the Vagrant box
 
@@ -50,7 +49,7 @@ Host Machine:
 packer build ubuntu14.04-dockertutorial-01.json
 ```
 
-**IMPORTANT: Libvirt by default uses /tmp during image build operations. If your /tmp is <6GB please provide a directory with sufficient space in the TMPDIR var**
+**IMPORTANT: Libvirt by default uses ```/tmp``` during image build operations. If your ```/tmp``` is <6GB please provide a directory with sufficient space in the ```TMPDIR``` environment variable**
 
 ```bash
 export TMPDIR=/path/with/space; packer build ubuntu14.04-dockertutorial-01.json
@@ -62,7 +61,7 @@ export TMPDIR=/path/with/space; packer build ubuntu14.04-dockertutorial-01.json
 packer build vbox-ubuntu14.04-dockertutorial-01.json
 ```
 
-##### VMWare Fusion (Mac OSX):
+##### VMWare Fusion (Mac OS X):
 
 ```bash
 packer build vmware-ubuntu14.04-dockertutorial-01.json
@@ -105,7 +104,7 @@ vagrant up --provider=virtualbox --no-parallel
 
 #### VMWare Fusion:
 
-Ensure you have purchased and installed the vmware fusion vagrant plugin installed.
+Ensure you have purchased and installed the VMware Fusion Vagrant plugin installed.
 Run:
 
 ```bash

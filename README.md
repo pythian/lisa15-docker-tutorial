@@ -23,7 +23,7 @@
 
 ## Overview
 
-Blah blah
+Overview goes here.
 
 ## Setting up the tutorial environment
 

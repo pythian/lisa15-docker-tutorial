@@ -48,7 +48,7 @@
       with_items:
         - "gliderlabs/registrator:latest"
         - "shipyard/rethinkdb"
-        - "shipyard/shipyard"
+        - "shipyard/shipyard:2.0.10"
         - "progrium/consul"
         - "ansible/ubuntu14.04-ansible:1.8"
         - "registry:2"
@@ -107,4 +107,3 @@
       apt:
         pkg: haproxy
         state: present
-  

@@ -9,7 +9,7 @@
     build_tmpdir: "tmp_packer_playbooks"
     packer_jsonfile: "helloweather_packerdef_using_ansible"
     docker_localansibletasks: "local_install_helloweather"
-    repo_url: "https://github.com/pythianliappis/pythonhelloweather"
+    repo_url: "https://github.com/bfraser/python-helloweather"
     repo_dir: "pythonhelloweather"
     dockerimage_appdir: "/app"
   tasks:
@@ -20,7 +20,7 @@
 
     - name: Ensure dir for playbooks used by packer exists
       file: path="/vagrant/{{build_tmpdir}}" state=directory owner=vagrant group=vagrant mode=0700
-      
+
     - name: Copy needed packer def file
       template: src="packer/{{packer_jsonfile}}.json.j2" dest="../{{build_tmpdir}}/{{packer_jsonfile}}{{rnd}}.json" owner=vagrant group=vagrant
 

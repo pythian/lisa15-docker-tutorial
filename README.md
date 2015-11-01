@@ -16,7 +16,7 @@
   * [Access the Application](#access-the-application)
   * [Review the HAProxy Configuration](#review-the-haproxy-configuration)
   * [Launch an Additional Container](#launch-an-additional-container)
-4. [Preconfigured IP Addresses](#preconfigured-ip-addresses)
+4. [IP Addresses and Interfaces](#ip-addresses-and-interfaces)
 5. [Software Installed](#software-installed)
 6. [VM Specific Software](#vm-specific-software)
 7. [Acknowledgements](#acknowledgements)
@@ -46,25 +46,25 @@ Overview goes here.
 ##### Libvirt
 
 ```bash
-packer build ubuntu14.04-dockertutorial-01.json
+packer build ubuntu14.04-dockertutorial.json
 ```
 
 **IMPORTANT: Libvirt by default uses ```/tmp``` during image build operations. If your ```/tmp``` is <6GB please provide a directory with sufficient space in the ```TMPDIR``` environment variable**
 
 ```bash
-export TMPDIR=/path/with/space; packer build ubuntu14.04-dockertutorial-01.json
+export TMPDIR=/path/with/space; packer build ubuntu14.04-dockertutorial.json
 ```
 
 ##### VirtualBox:
 
 ```bash
-packer build vbox-ubuntu14.04-dockertutorial-01.json
+packer build vbox-ubuntu14.04-dockertutorial.json
 ```
 
 ##### VMWare Fusion (Mac OS X):
 
 ```bash
-packer build vmware-ubuntu14.04-dockertutorial-01.json
+packer build vmware-ubuntu14.04-dockertutorial.json
 ```
 
 #### Adding a user
@@ -73,15 +73,21 @@ As an option if you want to create a new user e.g. ubuntu use:
 
 ```bash
 read -p 'Enter password: ' -s password
-packer build -var 'user=ubuntu' -var "password=$password" ubuntu14.04-dockertutorial-01.json
+packer build -var 'user=ubuntu' -var "password=$password" ubuntu14.04-dockertutorial.json
 ```
 
 ### Adding the box to Vagrant
 
-Packer will build a box that you can find in the ```box/``` directory. Add it to your Vagrant environment using:
+Packer will build a box that you can find in the ```box/``` directory. Add it to your Vagrant environment using the following command, replacing ```<provider>``` with the name of the provider you are using:
 
 ```bash
-vagrant box add box/dockertutorial-01.box --name "dockertutorial"
+vagrant box add box/dockertutorial-<provider>.box --name "dockertutorial"
+```
+
+**NOTE: If you are manually building the box with Packer and adding it to Vagrant, modify the ```host_config.vm.box``` line in ```Vagrantfile``` so it reads as follows:**
+
+```
+host_config.vm.box = 'dockertutorial'
 ```
 
 ### Provision the virtual machines with Vagrant
@@ -158,14 +164,27 @@ You may explicitly specify the Shipyard engine (Docker host) you wish your conta
 ```bash
 vagrant@dockertutorial-01:/vagrant$ ansible-playbook ansible_build_deploy/deploy_helloweather.yml -e "target_shipyard_engine=dockertutorial-03"
 ```
+### List services registered in Consul
 
-## Preconfigured IP addresses:
+Obtain a list of all services:
 
-| Vagrant VM name   |      IP Address |
-| ---------------   | --------------- |
-| dockertutorial-01 | 192.168.123.140 |
-| dockertutorial-02 | 192.168.123.141 |
-| dockertutorial-03 | 192.168.123.142 |
+```bash
+curl http://192.168.123.140:8500/v1/catalog/services | json_pp
+```
+
+List details of the ```helloweather``` service:
+
+```bash
+curl http://192.168.123.140:8500/v1/catalog/service/helloweather | json_pp
+```
+
+## IP addresses and Interfaces:
+
+| Vagrant VM name   |      IP Address |                      Consul |                    Shipyard |                      HAProxy |
+| ---------------   | --------------- | --------------------------- | --------------------------- | ---------------------------- |
+| dockertutorial-01 | 192.168.123.140 | <http://192.168.123.140:8500> | <http://192.168.123.140:8080> | <http://192.168.123.140:10000> |
+| dockertutorial-02 | 192.168.123.141 | <http://192.168.123.141:8500> | | |
+| dockertutorial-03 | 192.168.123.142 | <http://192.168.123.142:8500> | | |
 
 ## Software installed:
 

@@ -63,9 +63,9 @@
 
     "post-processors": [
         {
-            "keep_input_artifact": false,
-            "output": "box/dockertutorial-01.box",
-            "type": "vagrant"
+            "type": "vagrant",
+            "output": "box/dockertutorial-{{.Provider}}.box",
+            "keep_input_artifact": false
         }
     ]
 }

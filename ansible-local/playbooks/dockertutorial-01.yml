@@ -39,7 +39,7 @@
     - shell: "docker ps | awk '{print $NF}'"
       register: dockerpsnames_output
       when: "'/usr/bin/docker -d' in ps_output.stdout"
-      
+
     - name: "Start RethinkDB container"
       command: "docker run -p=32770:8080 -p=32769:28015 -p=32768:29015 -it -d --name shipyard-rethinkdb --volumes-from shipyard-rethinkdb-data shipyard/rethinkdb"
       # Start only if shipyard-rethinkdb not present and shipyard-rethinkdb-data present in last column of docker ps
@@ -68,7 +68,7 @@
       wait_for: host=172.17.0.2 port=28015 state=started
 
     - name: "Start Shipyard controller"
-      command: "docker run -i -t -p 8080:8080 -d --name shipyard --link shipyard-rethinkdb:rethinkdb shipyard/shipyard -disable-usage-info"
+      command: "docker run -i -t -p 8080:8080 -d --name shipyard --link shipyard-rethinkdb:rethinkdb shipyard/shipyard:2.0.10 -disable-usage-info"
       when: "'/usr/bin/docker -d' in ps_output.stdout and ('shipyard-rethinkdb-data' in dockerpsnames_output.stdout) and (dockerpsnames_output.stdout | search('shipyard-rethinkdb[\n|$]')) and not (dockerpsnames_output.stdout | search('shipyard[\n|$]'))"
 
     # Install private registry
@@ -78,7 +78,7 @@
       with_items:
         - "{{private_registry_mountpoint}}"
         - "{{docker_priv_registry_path}}"
-        
+
     - command: "ps -ef"
       register: ps_output
 
@@ -189,4 +189,3 @@
         body='{ "name": "gliderlabs/registrator", "cpus": 0.2, "memory": 0.0, "type": "service", "hostname": "registrator", "domain": "", "container_name": "{{ansible_hostname}}-registrator", "args" : ["consul://{{dockertutorial01_ip}}:8500"], "labels" : [ "dockertutorial-01" ], "volumes": [ "/var/run/docker.sock:/tmp/docker.sock" ], "restart_policy": { "name": "always" } }'
       #TODO: container list should only show containers for this vm
       #when: "not current_container_list.content | search('registrator')"
-

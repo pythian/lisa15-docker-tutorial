@@ -20,7 +20,7 @@ global
 
 defaults
     mode http
-    timeout connect 5000ms	
+    timeout connect 5000ms
     timeout client 50000ms
     timeout server 50000ms
     log global
@@ -35,4 +35,4 @@ backend {{backend01_servicename}}containers
     balance roundrobin
     option httpclose
     option httpchk HEAD / HTTP/1.1\r\nHost:localhost{{'{{'}}range service "{{backend01_servicename}}"{{'}}'}}
-    {% raw %}server {{.Node}} {{.Address}}:{{.Port}}{{end}}{% endraw %}
+    {% raw %}server {{.Node}} {{.NodeAddress}}:{{.Port}}{{end}}{% endraw %}

@@ -29,7 +29,7 @@ Vagrant.configure('2') do |config|
 
   hosts.each do |host, params|
     config.vm.define host, autostart: true do |host_config|
-      host_config.vm.box = 'dockertutorial'
+      host_config.vm.box = 'bfraser/dockertutorial'
       host_config.vm.hostname = "#{host}"
       host_config.vm.network :private_network, ip: params['address']
 
@@ -61,10 +61,10 @@ Vagrant.configure('2') do |config|
         override.vm.synced_folder '.', '/vagrant', disabled: true
         override.vm.synced_folder './ansible-local/','/tmp/vagrantupansible', type: 'rsync'
         override.vm.synced_folder './ansible_build_deploy/','/vagrant/ansible_build_deploy/', type: 'rsync', create: true
-        vmwarefusion.vmx["memsize"] = params['memory']
-        vmwarefusion.vmx["numvcpus"] = params['cpus']
-        end
-      
+        vmwarefusion.vmx['memsize'] = params['memory']
+        vmwarefusion.vmx['numvcpus'] = params['cpus']
+      end
+
       host_config.vm.provision :shell, inline: "ansible-playbook /tmp/vagrantupansible/playbooks/#{host}.yml"
 
       if (/dockertutorial-01/ =~ host) != nil

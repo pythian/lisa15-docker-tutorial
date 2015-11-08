@@ -41,7 +41,7 @@ Overview goes here.
 
 ### Building the Vagrant box
 
-**NOTE: This step is only necessary if you would like to build the box yourself. If you simply want to get started with the tutorial environment, download a pre-built box from Atlas for your preferred virtualization provider.**
+**NOTE: This step is only necessary if you would like to build the box yourself. If you simply want to get started with the tutorial environment, download and add a pre-built box from Atlas for your preferred virtualization provider, or skip to the [provisioning step](#provision-the-virtual-machines-with-vagrant) and let Vagrant do it for you.**
 
 https://atlas.hashicorp.com/bfraser/boxes/dockertutorial
 

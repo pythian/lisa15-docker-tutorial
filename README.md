@@ -41,6 +41,10 @@ Overview goes here.
 
 ### Building the Vagrant box
 
+**NOTE: This step is only necessary if you would like to build the box yourself. If you simply want to get started with the tutorial environment, download a pre-built box from Atlas for your preferred virtualization provider.**
+
+https://atlas.hashicorp.com/bfraser/boxes/dockertutorial
+
 #### Providers
 
 ##### Libvirt
@@ -84,7 +88,7 @@ Packer will build a box that you can find in the ```box/``` directory. Add it to
 vagrant box add box/dockertutorial-<provider>.box --name "dockertutorial"
 ```
 
-**NOTE: If you are manually building the box with Packer and adding it to Vagrant, modify the ```host_config.vm.box``` line in ```Vagrantfile``` so it reads as follows:**
+**NOTE: If you are manually building the box with Packer and adding it to Vagrant, instead of using one of the pre-built [boxes](https://atlas.hashicorp.com/bfraser/boxes/dockertutorial), modify the ```host_config.vm.box``` line in ```Vagrantfile``` so it reads as follows:**
 
 ```
 host_config.vm.box = 'dockertutorial'
